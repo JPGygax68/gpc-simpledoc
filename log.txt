@@ -1,0 +1,28 @@
+2015-05-29
+==========
+
+I did some experimenting with Knockout and contenteditable.
+
+My assessment for the moment is that Knockout may be ill-suited to be the workhorse for a document editor (though it could still, and probably should, be made into a Knockout component at some point).
+
+The reason is that contenteditable can do impressive things on its own. For example, appending a new paragraph to an existing one is something that requires no programming at all. But if one wanted to maintain a 1:1 relationship between Knockout view-models and P elements in the DOM, one would need to both intercept all the events leading to the creation of the new paragraph, which could be very difficult to do and still be very unreliable, and the do the exact same thing programmatically.
+
+This means that it would probably be a better idea to let contenteditable do its thing without too much interference, with the code just sprinkling in its support to guide things and enforce a few rules in the interest of well-formedness.
+
+This means that updating the model is something that has to be done programmatically as well. I'm not 100% sure at this point whether this should be an actual data model or a view-model, i.e. an intermediary. Since Knockout is ill-suited for free-style document editing, it would not be a Knockout view-model anyway. So I think I will define an actual data model, with JS objects in minds (but potentially adaptable/upgradeable to XML).
+
+Updating said data model should happen in response to input events. For example, when the user presses the RETURN key, the browser will insert/append a new paragraph at the cursor position, meaning that it will be safe to store the paragraph it was previously in.
+
+That should indeed be the modus operandi: let the browser do its thing (mostly), then update the data model from the DOM. In some cases, it may be necessary to delay the programmed reaction (via a 1ms timeout?); specifically, when the idea is to modify the DOM structure created/modified by the browser. Though it is my hope that things can be monitored with sufficient precision to make it possible to simply abort events, rather than trying to fix things after they're done.
+
+Next step: create a Knockout custom binding called "GPC SimpleDocument", then implement that using jQuery. The first goal would be the ability to append/insert and delete paragraphs, and update a super-simple data model defined thus:
+
+  - Document: [ Node ]
+  - Node <- Paragraph
+  - Node <- [ Node ]
+
+Other node types will be added later.
+
+Another idea would be to use the DOM itself as the "official" data model, and leave storing it to consumers. That does present a potential problem though in that the DOM will likely have to be annotated by the document editor for its own benefit, meaning that filtering would be necessary.
+
+Yet another idea would be to use XSLT to load and store documents, implying the use of XML instead of JSON. In all likelihood though, JS code would be the easiest choice.

@@ -1,0 +1,10 @@
+2015-05-26
+==========
+
+Yet another start, betting on Knockout to make the hard things possible.
+
+So far, I have defined the Program Element class and postulated that it MUST contain a short_description and MAY contain steps.
+
+I'm not sure about the term "steps" though, because that term implies a sequential order, something that I would like to avoid. Sequentiality should be replaced with output-to-input chaining whenever possible, leaving (machine) code generators free to rearrange instructions as necessary.
+
+.. there: child_elements instead of "steps". (Also rearranged the structure and CSS a bit - must be careful, I'm getting carried away here.)
