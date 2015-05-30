@@ -1,3 +1,12 @@
+2015-05-30
+==========
+
+It appears that I will have to intercept the RETURN key: Firefox does not create a new element (contrary to Chrome), but merely inserts a br element. Fixing this after it has happened would introduce a "twitchiness" that no one wants to see.
+
+-----
+
+Apparently, counting "input" events and "ctrl-z" occurrences is the only way to detect whether an undo should be left to the browser or handled by my code (and even that may well be unreliable (will the browser consider the "undo" as done or not when I cancel the ctrl-z keydown event?). I fear I will still have a way to work with this.
+
 2015-05-29
 ==========
 
