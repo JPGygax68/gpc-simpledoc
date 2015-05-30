@@ -5,66 +5,103 @@ var _ = require('underscore');
 var $ = require('jquery');
 var rangy = require('rangy');
 
-function wrap(elem, options) {
-  
-  if (ko.isObservable(elem)) {
-    return elem;
-  }
-  else if (_.isArray(elem)) {
-    return ko.observableArray(elem);
-  }
-  else if (_.isObject(elem)) {
-    return elem;
-  }
-  else {
-    if (_.isUndefined(elem) && !!options) elem = options.def_val;
-    return ko.observable(elem);
-  }
-}
-
-function Controller() {
-}
-
-Controller.prototype.save = function(element)
+function Node()
 {
-  console.log('Controller::save()', 'firstChild:', element.firstChild);
+}
+
+function Container(params)
+{
+  Node.apply(this, params);
+  
+  params = params || {};
+  
+  this.child_nodes = [];
+}
+
+Container.prototype = new Node();
+
+Container.prototype.appendParagraph = function(p)
+{
+  console.log('Node::appendParagraph');
+  
+  this.child_nodes.push( p );
+}
+
+function Document()
+{
+  Container.apply(this, arguments);
+}
+
+Document.prototype = new Container();
+
+function Paragraph(params)
+{
+  Node.apply(this, arguments);
+  
+  params = params || {};
+  
+  this.content = params.content || '';
+}
+
+Paragraph.prototype = new Node();
+
+/*  Top-level controller.
+    More specialized controllers are probably needed, for special content (tables, code, etc.)
+ */
+function DocumentController(element, options)
+{
+  this.element = element;
+  this.options = options || {};
+}
+
+DocumentController.prototype.save = function(element)
+{
+  console.log('DocumentController::save()', 'firstChild:', element.firstChild);
   for (var child = element.firstChild; !!child; child = child.nextSibling) {
     console.log('  child:', child.nodeType +':', child);
   }
 }
 
-Controller.prototype.onKeyDown = function(e)
+DocumentController.prototype.onKeyDown = function(e)
   // e:       jQuery-wrapped keydown event
   // returns: return false will stop default action AND propagation (see jQuery)
 {
   if (e.keyCode === 13) {
     var sel = rangy.getSelection();
     if (sel.isCollapsed) {
-      console.log('selection is collapsed');
-      // TODO: instead of using the deepest enclosing node, find the closest
-      // ancestor that has "paragraph" level.
-      var before = rangy.createRangyRange();
-      before.setStartAndEnd(sel.anchorNode, 0, sel.anchorNode, sel.anchorOffset);
-      var after = rangy.createRangyRange();
-      after.setStart(sel.anchorNode, sel.anchorOffset);
-      after.setEndAfter(sel.anchorNode);
-      var part2 = after.extractContents();
-      var part1 = before.extractContents();
-      console.log(part1, part2);
-      var range = rangy.createRangyRange();
-      range.setStart(sel.anchorNode, 0);
-      console.log(range);
-      var p1 = document.createElement('p');
-      p1.appendChild(part1);
-      var p2 = document.createElement('p');
-      p2.appendChild(part2);
-      range.insertNode(p1);
-      range.collapseAfter(p1);
-      range.collapse();
-      range.insertNode(p2);
-      sel.setSingleRange(range);
+      this.queueSave();
     }
-    return false;
+    return true;
+  }
+}
+
+DocumentController.prototype.queueSave = function() 
+{ 
+  // TODO: block all input until the save is done ?
+  window.setTimeout(function() { this.save(); }.bind(this), 1); 
+}
+
+DocumentController.prototype.save = function()
+{
+  console.log('save()', this);
+  
+  var newdoc = new Document();
+  
+  for (var child = this.element.firstChild; !!child; child = child.nextSibling) {
+    console.log('child:', child);
+    if (child.tagName === 'P') 
+      newdoc.appendParagraph( paragraphFromElement(child) );
+    else
+      throw new Error('unexpected element:' + child);
+  }
+  
+  console.log('document:', newdoc);
+  
+  //------------------
+  
+  function paragraphFromElement(p)
+  {
+    return new Paragraph({content: $(p).text()}); // TODO: a real implementation
   }
 }
 
@@ -76,7 +113,7 @@ ko.bindingHandlers.gpcSimpleDocEditor = {
         
         console.log('this:', this);
         
-        var controller = new Controller();
+        var controller = new DocumentController(element);
         
         var value = ko.unwrap(valueAccessor());
         $(element)
