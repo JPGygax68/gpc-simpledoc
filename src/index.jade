@@ -4,22 +4,6 @@ head
   
   //- Tabula Rasa templates -------------------------------
   
-  script#gpc-simpledoc-paragraph-start(type="text/html")
-    p(data-bind="text: text")
-  
-  script#gpc-simpledoc-node(type="text/html")
-    div.gpc-simpledoc-node(data-bind="event: { keydown: onKeyDown, mouseover: onMouseOver }", contenteditable="true")
-      // ko if: isParagraph
-      p(data-bind="text: text")
-      // /ko
-      // ko foreach: child_nodes
-      // ko template: { name: 'gpc-simpledoc-node' }
-      // /ko
-      // /ko
-
-  script#gpc-simpledoc-document(type="text/html")
-    div.gpc-simpledoc-document(data-bind="template: { name: 'gpc-simpledoc-node' }")
-    
 body
   div#gpc-simpledoc-editor
-    div(data-bind="template: { name: 'gpc-simpledoc-document' }")
+    div(data-bind="gpcSimpleDocEditor: $data")

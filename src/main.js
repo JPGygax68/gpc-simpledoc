@@ -2,6 +2,7 @@
 
 var ko = require('knockout');
 var _ = require('underscore');
+var $ = require('jquery');
 
 function wrap(elem, options) {
   
@@ -20,59 +21,29 @@ function wrap(elem, options) {
   }
 }
 
-function Node(args) {
+ko.bindingHandlers.gpcSimpleDocEditor = {
+  
+    init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+        // This will be called when the binding is first applied to an element
+        // Set up any initial state, event handlers, etc. here
+        var value = ko.unwrap(valueAccessor());
+        console.log('value:', value);
+        $(element)
+          .addClass('gpc-simpledoc-editor')
+          .text(value.tagLine);
+    },
+    update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+        // This will be called once when the binding is first applied to an element,
+        // and again whenever any observables/computeds that are accessed change
+        // Update the DOM element based on the supplied values here.
+    }
+};
 
-  args = args || {};
+var my_doc = {
   
-  var self = this;
-  
-  this.isParagraph = ko.observable(false);
-  
-  this.dummy = 'dummy';
-  this.child_nodes = ko.observableArray(args.child_nodes || []);
-  
-  this.onKeyDown = function(e) {
-    console.log('Node.onKeyDown', e);
-    return true; // allow default actiont to happen
-  }
-  
-  this.onMouseOver = function(e) {
-    console.log('Node.onMouseOver', e);
-  }
-}
-
-function Paragraph(args) {
-  
-  Node.apply(this, arguments);
-
-  this.isParagraph(true);
-  
-  args = args || {};
-  
-  this.text = ko.observable(args.text || 'default paragraph text');
-}
-
-Paragraph.prototype = new Node();
-Paragraph.prototype.constructor = Paragraph;
-
-function Document(args) {
-  
-  Node.apply(this, arguments);
-}
-
-Document.prototype = new Node();
-Document.prototype.constructor = Document;
-
-var my_data = new Document({
-
-  child_nodes: [
-    new Paragraph({
-      text: 'This is a simple paragraph node'
-    }),
-    new Paragraph()
-  ]
-})
+  tagLine: "My very first SimpleDoc document"
+};
 
 window.onload = function() {
-  ko.applyBindings(my_data);
+  ko.applyBindings(my_doc);
 }

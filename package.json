@@ -29,6 +29,7 @@
     "watchify": "^2.5.0"
   },
   "dependencies": {
+    "jquery": "^2.1.4",
     "knockout": "^3.3.0"
   }
 }
