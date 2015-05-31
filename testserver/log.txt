@@ -1,0 +1,6 @@
+2015-05-31
+==========
+
+(Keeping a separate log for the test server, as it will likely become a real server pretty soon.)
+
+- Stylus middleware puts compiled .css files into same folder as .styl files. Better solution ?

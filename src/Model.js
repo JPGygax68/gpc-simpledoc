@@ -13,9 +13,11 @@ function Container(params)
 
 Container.prototype = new Node();
 
+// TODO: remove and use generic append() instead ?
+
 Container.prototype.appendParagraph = function(p)
 {
-  console.log('Node::appendParagraph');
+  //console.log('Node::appendParagraph');
   
   this.child_nodes.push( p );
 }

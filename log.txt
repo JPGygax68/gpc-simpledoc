@@ -7,6 +7,12 @@ It appears that I will have to intercept the RETURN key: Firefox does not create
 
 Apparently, counting "input" events and "ctrl-z" occurrences is the only way to detect whether an undo should be left to the browser or handled by my code (and even that may well be unreliable (will the browser consider the "undo" as done or not when I cancel the ctrl-z keydown event?). I fear I will still have a way to work with this.
 
+-----
+
+Strange - after having almost completed paragraph splitting, it appears that it is not necessary after all. The problems earlier, including the browser differences, were apparently due to the fact that the initial document did not have a paragraph element.
+
+This means that care must be taken to ensure that P elements are used whereever appropriate. In fact, this is related to all sorts of questions of how - or how not - to structure documents.
+
 2015-05-29
 ==========
 

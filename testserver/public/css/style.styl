@@ -1,0 +1,21 @@
+html {
+  background-color: #EEE;
+  height: 100%;
+}
+
+body {  
+
+  // Ye olde annoying margin-collapsing issue: http://www.sitepoint.com/web-foundations/collapsing-margins/
+  
+  > *:first-child {
+    margin-top: 0;
+  }
+
+  box-sizing: border-box;
+  padding: 0.25em;
+  
+  min-height: 100%;
+  width: 1280px; // TODO: responsive! use Bootstrap ?
+  margin: 0 auto;
+  background-color: white;
+}

@@ -1,0 +1,15 @@
+html {
+  background-color: #eee;
+  height: 100%;
+}
+body {
+  box-sizing: border-box;
+  padding: 0.25em;
+  min-height: 100%;
+  width: 1280px;
+  margin: 0 auto;
+  background-color: #fff;
+}
+body > *:first-child {
+  margin-top: 0;
+}
