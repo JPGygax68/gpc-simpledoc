@@ -12,6 +12,7 @@
   "author": "gygax@practicomp.ch",
   "license": "MIT",
   "dependencies": {
+    "browserify-middleware": "^5.0.2",
     "cradle": "^0.6.9",
     "express": "^4.12.4",
     "nib": "^1.1.0",

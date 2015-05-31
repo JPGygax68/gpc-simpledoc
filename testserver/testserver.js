@@ -3,6 +3,7 @@
 var express = require('express');
 var stylus = require('stylus');
 var nib = require('nib');
+var browserify = require('browserify-middleware');
 
 var ArticleProvider = require('./ArticleProvider');
 
@@ -22,6 +23,8 @@ app.set('views', __dirname + '/views');
 //app.use(express.logger('dev'));
 app.use(stylus.middleware({src: __dirname + '/public', compile: compileStylus}));
 app.use(express.static(__dirname + '/public'));
+//app.use(express.static(__dirname + '/../dist'));
+app.use('/js', browserify('./js'));
 
 app.get('/', function (req, res) {
   

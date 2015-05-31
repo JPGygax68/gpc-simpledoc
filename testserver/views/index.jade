@@ -3,5 +3,10 @@ html
   head
     title SimpleDoc test server
     link(rel="stylesheet", href="/css/style.css")
+    //-script(src="/scripts/knockout-3.3.0.js")
+    //script(src="/js/gpc-simpledoc.js")
   body
     h1 Hello SimpleDoc!
+    div(data-bind="ko gpcSimpleDocEditor: {}")
+    script(src="/js/main.js")
+  

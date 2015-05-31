@@ -1,3 +1,8 @@
+2015-05-31
+==========
+
+- CAUTION: .gitignore contains dist/*, meaning that NPM will ignore it too by default ?
+
 2015-05-30
 ==========
 

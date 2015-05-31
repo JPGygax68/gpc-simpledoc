@@ -19,7 +19,7 @@ gulp.task('jade', [], function() {
   
   return gulp.src('src/**/*.jade', {base: 'src/'})
     .pipe( jade({pretty: true}) )
-    .pipe( gulp.dest('./build') )
+    .pipe( gulp.dest('./dist') )
     .pipe( notify("Jade task complete") );
 });
 
@@ -27,7 +27,6 @@ gulp.task('jade', [], function() {
 
 gulp.task("browserify", function() {
 
-  //var b = watchify(browserify('./src/main.js', watchify.args));
   var b = browserify('./src/main.js');
 
   return bundle();
@@ -38,11 +37,11 @@ gulp.task("browserify", function() {
     
     return b.bundle()
       .on('error', notify.onError('Error: <%= error.message %>') )
-      .pipe(source('main.js'))
+      .pipe(source('gpc-simpledoc.js'))
       .pipe(buffer())
       .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(sourcemaps.write('./'))
-      .pipe(gulp.dest('./build'))
+      .pipe(gulp.dest('./dist'))
       .on('log', gutil.log)
       .pipe(notify('Browserify bundling completed'))
   }
@@ -55,7 +54,7 @@ gulp.task('css', function() {
   return gulp.src('./src/**/*.styl')
     .pipe( stylus( { whitespace: true } ) )
     //.pipe( csso() )
-    .pipe( gulp.dest('./build/') )
+    .pipe( gulp.dest('./dist/') )
     //.pipe( livereload( server ))
     .pipe( notify('CSS task complete') )
 });
@@ -65,11 +64,11 @@ gulp.task('css', function() {
 gulp.task("copy", [], function() {
   
   return gulp.src('src/**/*.css', {base: 'src/'})
-    .pipe( gulp.dest('./build') )
+    .pipe( gulp.dest('./dist') )
     .pipe( notify("Copy task complete") );
 });
 
-// Overall build ------------------------------------------
+// Overall build tasks ------------------------------------
 
 gulp.task('build', ['jade', 'browserify', 'css']);
 
