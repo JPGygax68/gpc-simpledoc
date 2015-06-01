@@ -1,10 +1,17 @@
 "use strict";
 
 var ko = require('knockout');
+var insertCss = require('insert-css');
 
 var DocumentController = require('./DocumentController');
 var Model = require('./Model');
 
+console.log('gpc-simpledoc: main.js');
+
+ko.DUMMY = 'dummy';
+
+/* Register the Knockout custom binding.
+ */
 ko.bindingHandlers.gpcSimpleDocEditor = {
   
   init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
@@ -13,7 +20,7 @@ ko.bindingHandlers.gpcSimpleDocEditor = {
     
     var controller = new DocumentController(element);
     
-    controller.load( valueAccessor() );
+    controller.load(viewModel);
   },
   update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
     // This will be called once when the binding is first applied to an element,
@@ -22,13 +29,14 @@ ko.bindingHandlers.gpcSimpleDocEditor = {
   }
 };
 
-var my_doc = new Model.Document({  
-  child_nodes: [
-    new Model.Paragraph({content: "This is the first paragraph."}),
-    new Model.Paragraph({content: "So that makes this the second paragraph"})
-  ]
-});
-
-window.onload = function() {
-  ko.applyBindings(my_doc);
+module.exports = {
+  
+  init: function() {
+    insertCss( require("./gpc-simpledoc.styl") );
+  },
+  
+  Model: Model,
+  
+  ko: ko,
+  knockout: ko
 }

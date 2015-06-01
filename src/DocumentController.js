@@ -29,6 +29,8 @@ function DocumentController(element, options)
     .on('input', function(e) {
       console.log('input event:', e);
     })      
+    
+  console.log('DocumentController ctor:', this);
 }
 
 DocumentController.prototype.onKeyDown = function(e)

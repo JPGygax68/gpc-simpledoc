@@ -3,6 +3,8 @@
 
 - CAUTION: .gitignore contains dist/*, meaning that NPM will ignore it too by default ?
 
+- TODO next: css-injector
+
 2015-05-30
 ==========
 
