@@ -3,8 +3,6 @@
 var gsd = require('gpc-simpledoc');
 var ko = gsd.ko;
 
-console.log("ko.bindingHandlers:", ko.bindingHandlers, ko.bindingHandlers.gpcSimpleDocEditor);
-
 gsd.init();
 
 var doc = new gsd.Model.Document({  

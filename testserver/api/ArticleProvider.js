@@ -25,6 +25,17 @@ function ArticleProvider(host, port)
   }.bind(this))
 }
 
+ArticleProvider.prototype.newUuid = function(callback)
+{
+  console.log('ArticleProvider::newUuid');
+  
+  this.connection.uuids(1, function(err, data) {
+    console.log('err:', err, 'data:', data);
+    if (err) callback(data);
+    else callback(null, data[0]);
+  });
+}
+
 ArticleProvider.prototype.findAll = function(callback)
 {
   console.log('findAll');
