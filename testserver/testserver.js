@@ -22,6 +22,8 @@ app.use(express.static(__dirname + '/public'));
 //app.use(express.static(__dirname + '/../dist'));
 app.use('/js', browserify('./js'));
 
+app.use(require('body-parser').json());
+
 app.get('/', function (req, res) {
   
   res.render('index', {});

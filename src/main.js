@@ -19,8 +19,8 @@ ko.bindingHandlers.gpcSimpleDocEditor = {
     // Set up any initial state, event handlers, etc. here
     
     var controller = new DocumentController(element);
-    
-    controller.load(viewModel);
+
+    controller.load(valueAccessor().data || bindingContext.$data);
   },
   update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
     // This will be called once when the binding is first applied to an element,
@@ -38,5 +38,6 @@ module.exports = {
   Model: Model,
   
   ko: ko,
-  knockout: ko
+  knockout: ko,
+  jQuery: require('jquery')
 }

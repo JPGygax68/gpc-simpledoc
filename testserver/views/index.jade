@@ -5,6 +5,7 @@ html
     link(rel="stylesheet", href="/css/style.css")
   body
     h1 Hello SimpleDoc!
-    div(data-bind="gpcSimpleDocEditor: {}")
+    div(data-bind="gpcSimpleDocEditor: { data: doc }")
+    button(data-bind="click: saveDocument") Save
     script(src="/js/main.js")
   
