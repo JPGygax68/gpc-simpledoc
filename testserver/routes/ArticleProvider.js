@@ -36,6 +36,11 @@ ArticleProvider.prototype.newUuid = function(callback)
   });
 }
 
+ArticleProvider.prototype.getIndex = function(callback)
+{
+  this.db.all( function(err, res) { callback(err, res); });
+}
+
 ArticleProvider.prototype.findAll = function(callback)
 {
   console.log('findAll');

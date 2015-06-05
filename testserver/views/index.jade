@@ -5,7 +5,13 @@ html
     link(rel="stylesheet", href="/css/style.css")
   body
     h1 Hello SimpleDoc!
-    div(data-bind="gpcSimpleDocEditor: { data: doc }")
-    button(data-bind="click: saveDocument") Save
-    script(src="/js/main.js")
+    div
+      h2 Existing documents:
+      ul(data-bind="foreach: index")
+        li(data-bind="text: $data.id")
+    div
+      h2 New document:
+      div(data-bind="gpcSimpleDocEditor: { data: newdoc }")
+      button(data-bind="click: saveDocument") Save
+      script(src="/js/main.js")
   

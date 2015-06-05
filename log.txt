@@ -3,6 +3,14 @@
 
 - RESTful cookbook: http://restcookbook.com/HTTP%20Methods/put-vs-post/
 
+--------
+
+Today's accomplishment: saving documents, and getting an index; both via hand-coded routes, and with Cradle as a "middle man" and/or "facilitator".
+
+I think there should be an NPM module for the repetitive part of a RESTful api. Not that it is long or difficult work, but in many cases, the only thing that changes is the class name of the objects contained in the collection, plus the plural form so that the collection can be properly named.
+
+I think supporting Backbone and/or Knockback should be doable with minimal code on both the server and the client side.
+
 2015-05-31
 ==========
 
@@ -23,7 +31,7 @@ Apparently, counting "input" events and "ctrl-z" occurrences is the only way to 
 
 Strange - after having almost completed paragraph splitting, it appears that it is not necessary after all. The problems earlier, including the browser differences, were apparently due to the fact that the initial document did not have a paragraph element.
 
-This means that care must be taken to ensure that P elements are used whereever appropriate. In fact, this is related to all sorts of questions of how - or how not - to structure documents.
+This means that care must be taken to ensure that P elements are used where ever appropriate. In fact, this is related to all sorts of questions of how - or how not - to structure documents.
 
 2015-05-29
 ==========

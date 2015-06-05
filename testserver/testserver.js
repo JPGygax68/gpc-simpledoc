@@ -4,6 +4,7 @@ var express = require('express');
 var stylus = require('stylus');
 var nib = require('nib');
 var browserify = require('browserify-middleware');
+var articles = require('./routes/articles');
 
 var app = express();
 
@@ -29,7 +30,7 @@ app.get('/', function (req, res) {
   res.render('index', {});
 })
 
-app.use('/api/articles', require('./api/articles')() );
+app.use('/api', articles);
 
 var server = app.listen(3000, function() {
   

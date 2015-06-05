@@ -18,7 +18,8 @@
     "express": "^4.12.4",
     "jquery": "^2.1.4",
     "nib": "^1.1.0",
-    "stylus": "^0.51.1"
+    "stylus": "^0.51.1",
+    "underscore": "^1.8.3"
   },
   "devDependencies": {
     "stylify": "^1.2.0"

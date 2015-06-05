@@ -4,12 +4,15 @@ var gsd = require('gpc-simpledoc');
 var ko = gsd.ko;
 //var ajax = require('component-ajax');
 var ajax = require('jquery').ajax;
+var _ = require('underscore');
 
 gsd.init();
 
 var data = {
   
-  doc: new gsd.Model.Document({  
+  index: new ko.observableArray([]),
+  
+  newdoc: new gsd.Model.Document({  
     child_nodes: [
       // TODO: create paragraphs by default (when passing vanilla objects)
       // TODO: support passing string directly
@@ -37,13 +40,12 @@ var data = {
         console.log('new_uuid as promised:', data);
       })
     */
-    console.log('this.doc:', JSON.stringify(this.doc));
+    console.log('this.newdoc:', JSON.stringify(this.newdoc));
     
-    ajax('/api/articles/store', {
+    ajax('/api/articles', {
       method: 'POST',
-      //dataType: 'json',
       contentType: 'application/json',
-      data: JSON.stringify(this.doc)
+      data: JSON.stringify(this.newdoc)
     })
     .then( function(result) {
       console.log('success:', result);
@@ -55,3 +57,13 @@ var data = {
 }
 
 ko.applyBindings(data);
+
+console.log('about to get list of articles');
+ajax('/api/articles', { dataType: 'json' })
+.then( function(result) {
+  console.log('Index:', result);
+  _.each(result, function(item) { console.log('item:', item); data.index.push(item); });
+})
+.fail( function(err) {
+  alert('failed to obtain article list:' + err);
+})
