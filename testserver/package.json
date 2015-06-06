@@ -16,12 +16,16 @@
     "browserify-middleware": "^5.0.2",
     "cradle": "^0.6.9",
     "express": "^4.12.4",
+    "gulp-swig": "^0.7.4",
     "jquery": "^2.1.4",
     "nib": "^1.1.0",
     "stylus": "^0.51.1",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-template": "^3.0.0",
     "stylify": "^1.2.0"
   }
 }

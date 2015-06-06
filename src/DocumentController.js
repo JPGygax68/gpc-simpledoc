@@ -64,7 +64,7 @@ DocumentController.prototype.load = function(doc)
     frag.appendChild( elementFromParagraph(child) );
   }
   
-  this.element.innerHtml = '';
+  this.element.innerHTML = '';
   this.element.appendChild(frag);
   
   //-----------------------

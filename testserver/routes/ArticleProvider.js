@@ -2,6 +2,8 @@
 
 var cradle = require('cradle');
 
+var design_doc = require("./articles_design.js");
+
 function ArticleProvider(host, port)
 {
   this.connection = new (cradle.Connection)(host, port, {
@@ -17,6 +19,10 @@ function ArticleProvider(host, port)
     }
     else if (exists) {
       console.log('Ok, database exists');
+      this.db.save("_design/all", design_doc, function(err, result) {
+        if (err) console.log('Failed to save design document:', err);
+        else console.log('Design document saved successfully.');
+      });
     }
     else {
       console.log('Database does not exist, attempting to create');
@@ -38,7 +44,8 @@ ArticleProvider.prototype.newUuid = function(callback)
 
 ArticleProvider.prototype.getIndex = function(callback)
 {
-  this.db.all( function(err, res) { callback(err, res); });
+  //this.db.all( function(err, res) { callback(err, res); });
+  this.db.view('all/index', {}, function(err, res) { callback(err, res); });
 }
 
 ArticleProvider.prototype.findAll = function(callback)
@@ -60,7 +67,7 @@ ArticleProvider.prototype.findAll = function(callback)
   })
 }
 
-ArticleProvider.prototype.findById = function(id, callback)
+ArticleProvider.prototype.getById = function(id, callback)
 {
   this.db.get(id, function(error, result) {
     

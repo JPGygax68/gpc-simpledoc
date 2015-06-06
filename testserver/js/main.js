@@ -15,13 +15,16 @@ var DocumentHelper = {
   
   getTagline: function(doc) {
     
+    console.log('getTagline:', doc);
+    
     var text;
     
     if (_.isString(doc.title) && doc.title.length > 0) {
       text = doc.title;
     }
     else if (this.hasChildren(doc)) {
-      text = this.child_nodes[0].text;
+      text = doc.child_nodes[0].content;
+      if (text.length > 80) text = text.slice(0, 80) + "...";
     }
     
     if (!_.isString(text)) text = '(unnamed/empty document)';
@@ -40,12 +43,12 @@ var data = {
   
   index: new ko.observableArray([]),
   
-  newdoc: {  
+  doc: ko.observable({  
     child_nodes: [
-      { content: "This is the first paragraph." },
-      { content: "So that makes this the second paragraph" }
+      { _type_: 'PARAGRAPH', content: "This is the first paragraph." },
+      { _type_: 'PARAGRAPH', content: "So that makes this the second paragraph" }
     ]
-  },
+  }),
   
   saveDocument: function() {
     console.log('saveDocument');
@@ -66,12 +69,12 @@ var data = {
         console.log('new_uuid as promised:', data);
       })
     */
-    console.log('this.newdoc:', JSON.stringify(this.newdoc));
+    console.log('this.doc:', JSON.stringify(ko.unwrap(this.doc)));
     
     ajax('/api/articles', {
       method: 'POST',
       contentType: 'application/json',
-      data: JSON.stringify(this.newdoc)
+      data: JSON.stringify(ko.unwrap(this.doc))
     })
     .then( function(result) {
       console.log('success:', result);
@@ -89,7 +92,19 @@ ajax('/api/articles', { dataType: 'json' })
   console.log('Index:', result);
   _.each(result, function(item) { 
     console.log('item:', item); 
-    data.index.push( DocumentHelper.getTagline(item) );
+    data.index.push( {
+      tagline: item.value.tagline, //DocumentHelper.getTagline(item),
+      load: function() {
+        ajax('/api/articles/'+item.id, { dataType: 'json' })
+          .then( function(doc) {
+            console.log('got the document:', doc);
+            data.doc(doc);
+          })
+          .fail( function(err) {
+            alert('Failed to load the document: ' + err);
+          })
+      }
+    });
   })
 })
 .fail( function(err) {

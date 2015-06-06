@@ -8,10 +8,11 @@ html
     div
       h2 Existing documents:
       ul(data-bind="foreach: index")
-        li(data-bind="text: $data")
+        li
+          a(data-bind="text: tagline, click: load", href="#")
     div
-      h2 New document:
-      div(data-bind="gpcSimpleDocEditor: { data: newdoc }")
+      h2 Loaded document:
+      div(data-bind="gpcSimpleDocEditor: { data: doc }")
       button(data-bind="click: saveDocument") Save
       script(src="/js/main.js")
   

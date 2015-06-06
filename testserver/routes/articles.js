@@ -24,7 +24,8 @@ var route = router.route('/articles');
 route.get( function(req, res) {
   console.log('/articles GET');
   article_provider.getIndex( function(err, index) {
-    console.log('Index:', index);
+    if (err) console.log('failed to get index:', err);
+    else console.log('Index:', index);
     res.end(JSON.stringify(index, null, '  '));
   })
 })
@@ -34,6 +35,15 @@ route.post( function(req, res) {
   article_provider.save(req.body, function(err, data) {
     if (err) res.status(500).end();
     else res.status(200).json(data);
+  })
+})
+
+router.get('/articles/:id', function(req, res) {
+  console.log('/articles/:id GET');
+  article_provider.getById(req.params.id, function(err, doc) {
+    console.log('callback:', err, doc);
+    if (err) res.status(500).end(); // TODO: examine error and map appropriate HTTP code
+    else res.json(doc);
   })
 })
   

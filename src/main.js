@@ -8,8 +8,6 @@ var Model = require('./Model');
 
 console.log('gpc-simpledoc: main.js');
 
-ko.DUMMY = 'dummy';
-
 /* Register the Knockout custom binding.
  */
 ko.bindingHandlers.gpcSimpleDocEditor = {
@@ -18,14 +16,14 @@ ko.bindingHandlers.gpcSimpleDocEditor = {
     // This will be called when the binding is first applied to an element
     // Set up any initial state, event handlers, etc. here
     
-    var controller = new DocumentController(element);
-
-    controller.load(valueAccessor().data || bindingContext.$data);
+    element._controller = new DocumentController(element);
   },
   update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
     // This will be called once when the binding is first applied to an element,
     // and again whenever any observables/computeds that are accessed change
     // Update the DOM element based on the supplied values here.
+
+    element._controller.load( ko.unwrap(valueAccessor().data || bindingContext.$data) );
   }
 };
 
