@@ -8,18 +8,44 @@ var _ = require('underscore');
 
 gsd.init();
 
+/* Since documents are now method-less JSON objects, we need a few conveniences
+  to access their data.
+ */ 
+var DocumentHelper = {
+  
+  getTagline: function(doc) {
+    
+    var text;
+    
+    if (_.isString(doc.title) && doc.title.length > 0) {
+      text = doc.title;
+    }
+    else if (this.hasChildren(doc)) {
+      text = this.child_nodes[0].text;
+    }
+    
+    if (!_.isString(text)) text = '(unnamed/empty document)';
+
+    console.log('text:', text);
+    
+    return text;
+  },
+  
+  hasChildren: function(doc) {
+    return doc.child_nodes && doc.child_nodes.length > 0;
+  }
+}
+
 var data = {
   
   index: new ko.observableArray([]),
   
-  newdoc: new gsd.Model.Document({  
+  newdoc: {  
     child_nodes: [
-      // TODO: create paragraphs by default (when passing vanilla objects)
-      // TODO: support passing string directly
-      new gsd.Model.Paragraph({content: "This is the first paragraph."}),
-      new gsd.Model.Paragraph({content: "So that makes this the second paragraph"})
+      { content: "This is the first paragraph." },
+      { content: "So that makes this the second paragraph" }
     ]
-  }),
+  },
   
   saveDocument: function() {
     console.log('saveDocument');
@@ -58,12 +84,16 @@ var data = {
 
 ko.applyBindings(data);
 
-console.log('about to get list of articles');
 ajax('/api/articles', { dataType: 'json' })
 .then( function(result) {
   console.log('Index:', result);
-  _.each(result, function(item) { console.log('item:', item); data.index.push(item); });
+  _.each(result, function(item) { 
+    console.log('item:', item); 
+    data.index.push( DocumentHelper.getTagline(item) );
+  })
 })
 .fail( function(err) {
   alert('failed to obtain article list:' + err);
 })
+
+//-------------------

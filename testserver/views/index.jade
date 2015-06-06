@@ -8,7 +8,7 @@ html
     div
       h2 Existing documents:
       ul(data-bind="foreach: index")
-        li(data-bind="text: $data.id")
+        li(data-bind="text: $data")
     div
       h2 New document:
       div(data-bind="gpcSimpleDocEditor: { data: newdoc }")

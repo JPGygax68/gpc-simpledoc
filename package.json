@@ -14,7 +14,7 @@
   "author": "Jean-Pierre Gygax",
   "license": "GPL3",
   "devDependencies": {
-    "browserify": "^9.0.3",
+    "browserify": "^10",
     "gulp": "^3.8.11",
     "gulp-jade": "^1.0.0",
     "gulp-notify": "^2.2.0",
@@ -29,7 +29,7 @@
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
     "vinyl-transform": "^1.0.0",
-    "watchify": "^2.5.0"
+    "watchify": "^3.2"
   },
   "dependencies": {
     "jquery": "^2.1.4",

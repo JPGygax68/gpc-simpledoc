@@ -1,3 +1,20 @@
+2015-06-06
+==========
+
+I find myself in danger of getting overwhelmed/demotivated again. So, I need to find the most logical and effective next baby step to keep the momentum going.
+
+Problem right now: documents have no names and/or titles
+
+-> method to get "tagline" ?
+-> is it good/ok to have a document data type that *needs* method (makes serializing/deserializing more complicated)
+-> what's the status right now?
+-> don't have de-serializing yet -> decision-making time
+   - Object.setPrototypeOf(obj, proto) can help
+   - is there a library to help with this? 
+     -> Yes, resurrect-js
+  -> on the whole, I think "dumb" data structures are superior in this case
+
+
 2015-05-31
 ==========
 
