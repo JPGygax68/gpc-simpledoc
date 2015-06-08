@@ -4,16 +4,13 @@ var _ = require('underscore');
 var $ = require('jquery');
 var rangy = require('rangy');
 
-var Model = require('./Model');
+//var Model = require('./Model');
 
-/*  Top-level controller.
-    More specialized controllers are probably needed, for special content (tables, code, etc.)
+/* The Widget class is a necessary evil: it creates the association between the
+  view model proper, i.e. the document, and the state of the widget editing it.
  */
-function DocumentController(element, options)
+function SimpleDocEditor()
 {
-  this.element = element;
-  this.options = options || {};
-
   var self = this;
   
   $(this.element)
@@ -33,7 +30,15 @@ function DocumentController(element, options)
   console.log('DocumentController ctor:', this);
 }
 
-DocumentController.prototype.onKeyDown = function(e)
+/* Must be called from the init() entry point of the custom binding.
+ */
+SimpleDocEditor.prototype.initialize = function(element)
+  // element: DOM element being bound to
+{
+  this.element = element;
+}
+
+SimpleDocEditor.prototype.onKeyDown = function(e)
   // e:       jQuery-wrapped keydown event
   // returns: return false will stop default action AND propagation (see jQuery)
 {
@@ -46,26 +51,30 @@ DocumentController.prototype.onKeyDown = function(e)
   }
 }
 
-DocumentController.prototype.queueSave = function() 
+SimpleDocEditor.prototype.queueSave = function() 
 { 
   // TODO: block all input until the save is done ?
   window.setTimeout(function() { this.save(); }.bind(this), 1); 
 }
 
-DocumentController.prototype.load = function(doc)
+SimpleDocEditor.prototype.load = function(doc)
 {
-  console.log('DocumentController::load()', doc);
+  console.log('SimpleDocEditor::load()', doc);
+
+  // TODO: make sure we're not throwing away a document already being edited
   
-  var frag = document.createDocumentFragment();
+  //var frag = document.createDocumentFragment();
+  var container = document.createElement('div');
+  container.className = 'gpc-simpledoc-editor';
+  container.contentEditable = true;
   
   for (var i = 0; i < doc.child_nodes.length; i ++) {
     var child = doc.child_nodes[i];
-    console.log('child:', child);
-    frag.appendChild( elementFromParagraph(child) );
+    container.appendChild( elementFromParagraph(child) );
   }
   
   this.element.innerHTML = '';
-  this.element.appendChild(frag);
+  this.element.appendChild(container);
   
   //-----------------------
   
@@ -77,28 +86,31 @@ DocumentController.prototype.load = function(doc)
   }
 }
 
-DocumentController.prototype.save = function()
+SimpleDocEditor.prototype.getDocument = function()
 {
-  console.log('DocumentController::save()');
+  console.log('SimpleDocEditor::save()');
   
-  var newdoc = new Model.Document();
+  var doc = {};
   
   for (var child = this.element.firstChild; !!child; child = child.nextSibling) {
     console.log('child:', child);
     if (child.tagName === 'P') 
-      newdoc.appendParagraph( paragraphFromElement(child) );
+      doc.child_nodes.push( paragraphFromElement(child) );
     else
       throw new Error('unexpected element:' + child);
   }
   
-  console.log('document:', newdoc);
+  console.log('-> document:', doc);
+  
+  return doc;
   
   //------------------
   
   function paragraphFromElement(p)
   {
-    return new Model.Paragraph({content: $(p).text()}); // TODO: a real implementation
+    // TODO: a real implementation
+    return new { content: $(p).text() };
   }
 }
 
-module.exports = DocumentController;
+module.exports = SimpleDocEditor;

@@ -12,7 +12,7 @@ html
           a(data-bind="text: tagline, click: load", href="#")
     div
       h2 Loaded document:
-      div(data-bind="gpcSimpleDocEditor: { data: doc }")
-      button(data-bind="click: saveDocument") Save
+      div(data-bind="gpcSimpleDocEditor: { data: docEditor }")
+      button(data-bind="click: saveCurrentDocument") Save currently loaded document
       script(src="/js/main.js")
   

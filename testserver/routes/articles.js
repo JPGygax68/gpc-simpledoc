@@ -76,7 +76,7 @@ route.post( function(req, res) {
   if (typeof articles.length === 'undefined') articles = [ articles ];
   
   // Timestamp each article
-  _.each(articles, function(article) { article.created_at = new Date(); });
+  articles.forEach( function(article) { article.created_at = new Date(); });
   
   // Save on CouchDB
   database.save(articles, function(error, result) {
@@ -103,4 +103,23 @@ router.get('/articles/:id', function(req, res) {
   })
 })
   
+route.put( function(req, res) {
+  console.log('/articles PUT', req.body);
+  
+  var article = req.body;
+  
+  // "Last modified" timestamps
+  article.modified_at = new Date();
+  
+  // Save on CouchDB
+  database.save(article._id, article._rev, article, function(err, result) {
+    if (err) {
+      res.status(404)
+        .end('CouchDB error while trying to save document: ' + err.toString()); // TODO: map error codes
+      return;
+    }
+    res.json(result);
+  })
+})
+
 module.exports = router;

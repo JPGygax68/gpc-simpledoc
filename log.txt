@@ -1,3 +1,16 @@
+2015-06-08
+==========
+
+I have now re-engineered the "thing" and decided that what I'm displaying on the page is not a document, but an editor.
+
+So now that I'm looking at this as a custom widget of sorts, things are starting to fall in place, especially regarding loading and saving documents (of which only the former works at this point: I can now do that via explicit code rather than try to have Knockout control the process.
+
+
+A thought: maybe I should put SimpleDoc CSS code into a separate file  perhaps even (eventually) make it a separate package - from the CSS meant for the editor.
+
+Another thought: this should probably become a Knockout "component" pretty soon.
+
+
 2015-06-06
 ==========
 

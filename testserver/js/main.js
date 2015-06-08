@@ -1,11 +1,20 @@
 "use strict";
 
-var gsd = require('gpc-simpledoc');
-var ko = gsd.ko;
-//var ajax = require('component-ajax');
 var ajax = require('jquery').ajax;
 var _ = require('underscore');
 
+var gsd = require('gpc-simpledoc');
+var SimpleDocEditor = gsd.Editor;
+var ko = gsd.ko;
+
+/*
+ko.observable({  
+    child_nodes: [
+      { _type_: 'PARAGRAPH', content: "This is the first paragraph." },
+      { _type_: 'PARAGRAPH', content: "So that makes this the second paragraph" }
+]})
+*/
+    
 gsd.init();
 
 /* Since documents are now method-less JSON objects, we need a few conveniences
@@ -43,15 +52,12 @@ var data = {
   
   index: new ko.observableArray([]),
   
-  doc: ko.observable({  
-    child_nodes: [
-      { _type_: 'PARAGRAPH', content: "This is the first paragraph." },
-      { _type_: 'PARAGRAPH', content: "So that makes this the second paragraph" }
-    ]
-  }),
+  docEditor: new SimpleDocEditor(),
   
-  saveDocument: function() {
-    console.log('saveDocument');
+  saveCurrentDocument: function(data) 
+  // Save the currently loaded document.
+  {
+    console.log('saveDocument', data);
     
     /*
     ajax('/api/articles/new_uuid', {
@@ -63,18 +69,15 @@ var data = {
       }
     })
     */
-    /*
-    ajax('/api/articles/new_uuid')
+    /* ajax('/api/articles/new_uuid')
       .then( function(data) {
         console.log('new_uuid as promised:', data);
-      })
-    */
-    console.log('this.doc:', JSON.stringify(ko.unwrap(this.doc)));
+      }) */
     
     ajax('/api/articles', {
-      method: 'POST',
+      method: 'PUT',
       contentType: 'application/json',
-      data: JSON.stringify(ko.unwrap(this.doc))
+      data: JSON.stringify(this.docEditor.getDocument())
     })
     .then( function(result) {
       console.log('success:', result);
@@ -98,7 +101,7 @@ ajax('/api/articles', { dataType: 'json' })
         ajax('/api/articles/'+item.id, { dataType: 'json' })
           .then( function(doc) {
             console.log('got the document:', doc);
-            data.doc(doc);
+            data.docEditor.load(doc);
           })
           .fail( function(err) {
             alert('Failed to load the document: ' + err);

@@ -3,10 +3,9 @@
 var ko = require('knockout');
 var insertCss = require('insert-css');
 
-var DocumentController = require('./DocumentController');
-var Model = require('./Model');
+var SimpleDocEditor = require('./SimpleDocEditor');
 
-console.log('gpc-simpledoc: main.js');
+console.log('gpc-simpledoc: main.js (registers Knockout custom binding)');
 
 /* Register the Knockout custom binding.
  */
@@ -16,14 +15,15 @@ ko.bindingHandlers.gpcSimpleDocEditor = {
     // This will be called when the binding is first applied to an element
     // Set up any initial state, event handlers, etc. here
     
-    element._controller = new DocumentController(element);
+    var widget = valueAccessor().data || bindingContext.$data;
+    widget.initialize(element);
   },
   update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
     // This will be called once when the binding is first applied to an element,
     // and again whenever any observables/computeds that are accessed change
     // Update the DOM element based on the supplied values here.
 
-    element._controller.load( ko.unwrap(valueAccessor().data || bindingContext.$data) );
+    var widget = valueAccessor().data || bindingContext.$data;
   }
 };
 
@@ -32,8 +32,9 @@ module.exports = {
   init: function() {
     insertCss( require("./gpc-simpledoc.styl") );
   },
-  
-  Model: Model,
+
+  Editor: SimpleDocEditor,
+  //documentFromDOM: require('./documentFromDOM'),
   
   ko: ko,
   knockout: ko,
