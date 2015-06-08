@@ -13,7 +13,11 @@ function SimpleDocEditor()
 {
   var self = this;
   
-  $(this.element)
+  this.container = document.createElement('div');
+  this.container.className = 'gpc-simpledoc-editor';
+  this.container.contentEditable = true;
+
+  $(this.container)
     .addClass('gpc-simpledoc-editor')
     .attr('contenteditable', true)
     .on('keydown', function(e) {
@@ -21,7 +25,7 @@ function SimpleDocEditor()
     })
     .on('blur', function(e) {
       console.log('blur:', e);
-      self.save(element);
+      //self.save(element); // TODO: save, but to temporary storage
     })
     .on('input', function(e) {
       console.log('input event:', e);
@@ -36,6 +40,8 @@ SimpleDocEditor.prototype.initialize = function(element)
   // element: DOM element being bound to
 {
   this.element = element;
+  element.innerHTML = '';
+  element.appendChild(this.container);
 }
 
 SimpleDocEditor.prototype.onKeyDown = function(e)
@@ -61,20 +67,15 @@ SimpleDocEditor.prototype.load = function(doc)
 {
   console.log('SimpleDocEditor::load()', doc);
 
-  // TODO: make sure we're not throwing away a document already being edited
-  
-  //var frag = document.createDocumentFragment();
-  var container = document.createElement('div');
-  container.className = 'gpc-simpledoc-editor';
-  container.contentEditable = true;
+  var frag = document.createDocumentFragment();
   
   for (var i = 0; i < doc.child_nodes.length; i ++) {
     var child = doc.child_nodes[i];
-    container.appendChild( elementFromParagraph(child) );
+    frag.appendChild( elementFromParagraph(child) );
   }
   
-  this.element.innerHTML = '';
-  this.element.appendChild(container);
+  this.container.innerHTML = '';
+  this.container.appendChild(frag);
   
   //-----------------------
   
@@ -90,9 +91,11 @@ SimpleDocEditor.prototype.getDocument = function()
 {
   console.log('SimpleDocEditor::save()');
   
-  var doc = {};
+  var doc = {
+    child_nodes: []
+  };
   
-  for (var child = this.element.firstChild; !!child; child = child.nextSibling) {
+  for (var child = this.container.firstChild; !!child; child = child.nextSibling) {
     console.log('child:', child);
     if (child.tagName === 'P') 
       doc.child_nodes.push( paragraphFromElement(child) );
@@ -109,7 +112,7 @@ SimpleDocEditor.prototype.getDocument = function()
   function paragraphFromElement(p)
   {
     // TODO: a real implementation
-    return new { content: $(p).text() };
+    return { content: $(p).text() };
   }
 }
 
