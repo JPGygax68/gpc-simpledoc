@@ -63,7 +63,13 @@ SimpleDocEditor.prototype.queueSave = function()
   window.setTimeout(function() { this.save(); }.bind(this), 1); 
 }
 
+/* "Load" the specified SimpleDoc document into this editor.
+  Mainly, this will create a DOM represention of the SimpleDoc document
+  that is made editable via the contentEditable attribute + some supporting
+  JS code.
+ */
 SimpleDocEditor.prototype.load = function(doc)
+  // doc SimpleDoc document object
 {
   console.log('SimpleDocEditor::load()', doc);
 
@@ -77,6 +83,8 @@ SimpleDocEditor.prototype.load = function(doc)
   this.container.innerHTML = '';
   this.container.appendChild(frag);
   
+  this.doc = doc;
+  
   //-----------------------
   
   function elementFromParagraph(p)
@@ -87,25 +95,23 @@ SimpleDocEditor.prototype.load = function(doc)
   }
 }
 
-SimpleDocEditor.prototype.getDocument = function()
+SimpleDocEditor.prototype.document = function() { return this.doc; }
+
+/* Commit changes made in the DOM to the SimpleDoc object assigned to this 
+  editor instance.
+ */
+SimpleDocEditor.prototype.commitChanges = function()
 {
-  console.log('SimpleDocEditor::save()');
-  
-  var doc = {
-    child_nodes: []
-  };
+  console.log('SimpleDocEditor::commitChanges()');
+
+  this.doc.child_nodes = [];
   
   for (var child = this.container.firstChild; !!child; child = child.nextSibling) {
-    console.log('child:', child);
     if (child.tagName === 'P') 
-      doc.child_nodes.push( paragraphFromElement(child) );
+      this.doc.child_nodes.push( paragraphFromElement(child) );
     else
       throw new Error('unexpected element:' + child);
   }
-  
-  console.log('-> document:', doc);
-  
-  return doc;
   
   //------------------
   

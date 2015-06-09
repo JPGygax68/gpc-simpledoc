@@ -74,10 +74,12 @@ var data = {
         console.log('new_uuid as promised:', data);
       }) */
     
+    this.docEditor.commitChanges();
+    
     ajax('/api/articles', {
       method: 'PUT',
       contentType: 'application/json',
-      data: JSON.stringify(this.docEditor.getDocument())
+      data: JSON.stringify(this.docEditor.document())
     })
     .then( function(result) {
       console.log('success:', result);
