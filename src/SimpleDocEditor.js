@@ -3,12 +3,8 @@
 var _ = require('underscore');
 var $ = require('jquery');
 var rangy = require('rangy');
+var Mousetrap = require('mousetrap');
 
-//var Model = require('./Model');
-
-/* The Widget class is a necessary evil: it creates the association between the
-  view model proper, i.e. the document, and the state of the widget editing it.
- */
 function SimpleDocEditor()
 {
   var self = this;
@@ -31,7 +27,13 @@ function SimpleDocEditor()
       console.log('input event:', e);
     })      
     
-  console.log('DocumentController ctor:', this);
+  // Key sequences (using Mousetrap)
+  Mousetrap(this.container).bind('ctrl+ins t', function(e, keys) {
+    console.log('not implemented yet: insert table', keys);
+    e.preventDefault();
+  }, 'keydown')
+  
+  console.log('SimpleDocEditor ctor:', this);
 }
 
 /* Must be called from the init() entry point of the custom binding.
@@ -51,17 +53,23 @@ SimpleDocEditor.prototype.onKeyDown = function(e)
   if (e.keyCode === 13) {
     var sel = rangy.getSelection();
     if (sel.isCollapsed) {
-      this.queueSave();
+      //this.queueCommit();
     }
     return true;
   }
+  else if (e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.keyCode === 45) {
+    this.key_combination = ['^Ins']
+  }
 }
 
-SimpleDocEditor.prototype.queueSave = function() 
+/*
+SimpleDocEditor.prototype.queueCommit = function() 
 { 
+  console.log('queueCommit');
   // TODO: block all input until the save is done ?
-  window.setTimeout(function() { this.save(); }.bind(this), 1); 
+  window.setTimeout(function() { this.commitChanges(); }.bind(this), 1); 
 }
+*/
 
 /* "Load" the specified SimpleDoc document into this editor.
   Mainly, this will create a DOM represention of the SimpleDoc document
