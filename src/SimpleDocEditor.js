@@ -5,6 +5,8 @@ var $ = require('jquery');
 var rangy = require('rangy');
 var Mousetrap = require('mousetrap');
 
+var Converter = require('./Converter');
+
 function SimpleDocEditor()
 {
   var self = this;
@@ -81,26 +83,12 @@ SimpleDocEditor.prototype.load = function(doc)
 {
   console.log('SimpleDocEditor::load()', doc);
 
-  var frag = document.createDocumentFragment();
-  
-  for (var i = 0; i < doc.child_nodes.length; i ++) {
-    var child = doc.child_nodes[i];
-    frag.appendChild( elementFromParagraph(child) );
-  }
+  var elem = Converter.dataToDOM(doc);
   
   this.container.innerHTML = '';
-  this.container.appendChild(frag);
+  this.container.appendChild(elem);
   
   this.doc = doc;
-  
-  //-----------------------
-  
-  function elementFromParagraph(p)
-  {
-    var el = document.createElement('p');
-    el.innerText = p.content;
-    return el;
-  }
 }
 
 SimpleDocEditor.prototype.document = function() { return this.doc; }
@@ -112,22 +100,7 @@ SimpleDocEditor.prototype.commitChanges = function()
 {
   console.log('SimpleDocEditor::commitChanges()');
 
-  this.doc.child_nodes = [];
-  
-  for (var child = this.container.firstChild; !!child; child = child.nextSibling) {
-    if (child.tagName === 'P') 
-      this.doc.child_nodes.push( paragraphFromElement(child) );
-    else
-      throw new Error('unexpected element:' + child);
-  }
-  
-  //------------------
-  
-  function paragraphFromElement(p)
-  {
-    // TODO: a real implementation
-    return { content: $(p).text() };
-  }
+  this.doc = Converter.domToData(this.container);
 }
 
 module.exports = SimpleDocEditor;

@@ -15,6 +15,9 @@ var data = {
   
   docEditor: new SimpleDocEditor(),
   
+  docId: null,
+  docRev: null,
+  
   saveCurrentDocument: function(data) 
   // Save the currently loaded document.
   {
@@ -26,6 +29,12 @@ var data = {
       }) */
     
     this.docEditor.commitChanges();
+    
+    // Obtain the current state of the document from the editor
+    var doc = this.docEditor.document();
+    
+    // Transfer the store document key (id + rev for CouchDB)
+    doc._id = this.docId, doc._rev = this.docRev;
     
     ajax('/api/articles', {
       method: 'PUT',
@@ -59,10 +68,12 @@ function reloadIndex()
       new_index.push( {
         tagline: item.value.tagline,
         load: function() {
+          data.docId = data.docRev = null;
           ajax('/api/articles/'+item.id, { dataType: 'json' })
             .then( function(doc) {
               console.log('got the document:', doc);
               data.docEditor.load(doc);
+              data.docId = doc._id, data.docRev = doc._rev;
             })
             .fail( function(err) {
               alert('Failed to load the document: ' + err);

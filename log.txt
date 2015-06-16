@@ -1,3 +1,27 @@
+2015-06-16
+==========
+
+Thoughts on how to proceed.
+
+A "document" can be and contain many and very different things. Because of that, any "Editor" needs to be carefully architectured so as to be extremely simple at its core, obtaining nearly all of its functionality via "plug-ins" or "pluggable components".
+
+The basic idea is relatively simple: every node in the document tree is represented by a DOM element (or a branch of DOM elements, if a single element is not sufficient). The Editor components draws upon a registry that provides functional elements for every known node type.
+
+"Juggling" these functional elements is the main task of the Editor component. The editor does not necessarily need to have the complete set of functional elements for every node type in order to be able to work on a document - some may be optional.
+
+Functional elements could be:
+
+- Converting the node (JS object) to a DOM representation
+- Converting the DOM representation back to a document node
+- Input filter to provide editing functionality
+
+With such a plug-in based architecture, the complex task of editing documents could actually become not only doable, but fun. Discipline will be required to avoid going into too many directions at once.
+
+Plug-ins could provide any number of functional elements, and might even compete among each other. 
+... but also work with each other, by looking each other up to collaborate (might be a can of worms though).
+
+Not sure about the following idea yet: hierarchical document node types ? With carefully crafted rules, functional elements could delegate work to other plug-ins without even knowing them, simply by telling the Editor that they are *not* consuming the event they received.
+
 2015-06-09
 ==========
 
