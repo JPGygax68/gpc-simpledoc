@@ -16,6 +16,7 @@
   "devDependencies": {
     "browserify": "^10",
     "gulp": "^3.8.11",
+    "gulp-babel": "^5.1.0",
     "gulp-jade": "^1.0.0",
     "gulp-notify": "^2.2.0",
     "gulp-plumber": "^1.0.0",
@@ -32,6 +33,7 @@
     "watchify": "^3.2"
   },
   "dependencies": {
+    "constructor": "git+https://github.com/dfkaye/constructor.git",
     "jquery": "^2.1.4",
     "knockout": "^3.3.0",
     "mousetrap": "^1.5.2",
@@ -39,7 +41,8 @@
   },
   "browserify": {
     "transform": [
-      "stylify"
+      "stylify",
+      "babelify"
     ]
   }
 }

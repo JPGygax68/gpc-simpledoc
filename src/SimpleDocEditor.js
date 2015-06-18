@@ -1,5 +1,7 @@
 "use strict";
 
+// TODO: change the name, as the editor can adapt to multiple document definitions
+
 var _ = require('underscore');
 var $ = require('jquery');
 var rangy = require('rangy');
@@ -37,6 +39,8 @@ function SimpleDocEditor()
   
   console.log('SimpleDocEditor ctor:', this);
 }
+
+SimpleDocEditor.Registry = require('./Registry');
 
 /* Must be called from the init() entry point of the custom binding.
  */
