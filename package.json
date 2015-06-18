@@ -14,6 +14,7 @@
   "author": "Jean-Pierre Gygax",
   "license": "GPL3",
   "devDependencies": {
+    "babelify": "^6.1.2",
     "browserify": "^10",
     "gulp": "^3.8.11",
     "gulp-babel": "^5.1.0",
