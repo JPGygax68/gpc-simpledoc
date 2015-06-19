@@ -40,7 +40,7 @@ gulp.task("browserify", function() {
       .on('error', notify.onError('Error: <%= error.message %>') )
       .pipe(source('gpc-simpledoc.js'))
       .pipe(buffer())
-      .pipe(babel())
+      //.pipe(babel())
       .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(sourcemaps.write('./'))
       .pipe(gulp.dest('./dist'))

@@ -7,7 +7,14 @@ var $ = require('jquery');
 var rangy = require('rangy');
 var Mousetrap = require('mousetrap');
 
-var Converter = require('./Converter');
+// TODO: the plugins should live in their own packages
+require('./document');
+
+//var Converter = require('./Converter');
+
+var Registry = require('./Registry');
+var document_toDOM = Registry.findPlugin('document', 'toDOM');
+var document_fromDOM = Registry.findPlugin('document', 'fromDOM');
 
 function SimpleDocEditor()
 {
@@ -87,7 +94,7 @@ SimpleDocEditor.prototype.load = function(doc)
 {
   console.log('SimpleDocEditor::load()', doc);
 
-  var elem = Converter.dataToDOM(doc);
+  var elem = document_toDOM(doc); //Converter.dataToDOM(doc);
   
   this.container.innerHTML = '';
   this.container.appendChild(elem);
@@ -104,7 +111,7 @@ SimpleDocEditor.prototype.commitChanges = function()
 {
   console.log('SimpleDocEditor::commitChanges()');
 
-  this.doc = Converter.domToData(this.container);
+  this.doc = document_fromDOM(this.container); // Converter.domToData(this.container);
 }
 
 module.exports = SimpleDocEditor;
