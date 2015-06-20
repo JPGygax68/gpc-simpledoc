@@ -1,3 +1,9 @@
+2015-06-20
+==========
+
+Handling inline elements is a problem that needs to be solved. I'm starting to experiment with that now.
+
+
 2015-06-16
 ==========
 
