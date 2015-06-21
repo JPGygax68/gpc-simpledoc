@@ -35,13 +35,23 @@ Registry.registerPlugin('document', 'fromDOM', function(container) {
       child_nodes: []
     };
     
-    for (var child = container.firstChild; !!child; child = child.nextSibling) 
+    /*
+    // Single paragraph (first child is a text node) ?
+    if (container.firstChild && container.firstChild.nodeType == 3) 
     {
-      if (child.tagName === 'P') 
-        doc.child_nodes.push( paragraphFromElement(child) );
-      else
-        throw new Error('unexpected element:' + child);
+      
     }
+    else // Multiple paragraphs
+    {
+      */
+      for (var child = container.firstChild; !!child; child = child.nextSibling) 
+      {
+        if (child.tagName === 'P') 
+          doc.child_nodes.push( paragraphFromElement(child) );
+        else
+          throw new Error('unexpected element:' + child);
+      }
+    //}
     
     return doc;
     
@@ -60,8 +70,11 @@ Registry.registerPlugin('document', 'fromDOM', function(container) {
         var text = '';
         for (var node = cont_elem.firstChild; !!node; node = node.nextSibling) 
         {
-          if (node.nodeType == 1)
+          if (node.nodeType == 1) {
+            // TODO: handle differences between browsers
+            // TODO: callbacks for special handling
             text += nodeToText(node) // recurse
+          }
           else if (node.nodeType == 3) 
             text += node.nodeValue;
           else
@@ -69,12 +82,5 @@ Registry.registerPlugin('document', 'fromDOM', function(container) {
         }
         return text;
       }
-      
-      /*
-      // TODO: a real implementation
-      // TODO: define and handle inline elements
-      console.log('p.innerHTML:', p.innerHTML);
-      return { content: p.innerHTML };
-      */
     }
 });

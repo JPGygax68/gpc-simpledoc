@@ -84,6 +84,21 @@ SimpleDocEditor.prototype.queueCommit = function()
 }
 */
 
+SimpleDocEditor.prototype.createNew = function()
+{
+  console.log('SimpleDocEditor::createNew()');
+  
+  // TODO: protect against discarding current document
+
+  // TODO: this should not be done here, it's document type dependent anyway
+  this.doc = {
+    child_nodes: [ { content: '' } ]
+  };
+  
+  this.container.innerHTML = '';
+  this.container.appendChild( document_toDOM(this.doc) );
+}
+
 /* "Load" the specified SimpleDoc document into this editor.
   Mainly, this will create a DOM represention of the SimpleDoc document
   that is made editable via the contentEditable attribute + some supporting
@@ -94,12 +109,10 @@ SimpleDocEditor.prototype.load = function(doc)
 {
   console.log('SimpleDocEditor::load()', doc);
 
-  var elem = document_toDOM(doc); //Converter.dataToDOM(doc);
+  this.doc = doc;
   
   this.container.innerHTML = '';
-  this.container.appendChild(elem);
-  
-  this.doc = doc;
+  this.container.appendChild( document_toDOM(this.doc) );
 }
 
 SimpleDocEditor.prototype.document = function() { return this.doc; }

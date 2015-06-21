@@ -15,8 +15,16 @@ var data = {
   
   docEditor: new SimpleDocEditor(),
   
-  docId: null,
-  docRev: null,
+  // null will not do, the variables really need to be undefined
+  docId: undefined,
+  docRev: undefined,
+  
+  createNewDocument: function(data)
+  {
+    this.docEditor.createNew();
+    delete this.docId;
+    delete this.docRev;
+  },
   
   saveCurrentDocument: function(data) 
   // Save the currently loaded document.
@@ -74,6 +82,19 @@ function reloadIndex()
               console.log('got the document:', doc);
               data.docEditor.load(doc);
               data.docId = doc._id, data.docRev = doc._rev;
+            })
+            .fail( function(err) {
+              alert('Failed to load the document: ' + err);
+            })
+        },
+        remove: function() {
+          ajax('/api/articles/'+item.id+'/'+item.value.rev, { type: 'DELETE' })
+            .then( function() {
+              console.log('document deleted');
+              data.docEditor.createNew();
+              delete data.docId;
+              delete data.docRev;
+              reloadIndex();
             })
             .fail( function(err) {
               alert('Failed to load the document: ' + err);

@@ -122,4 +122,18 @@ route.put( function(req, res) {
   })
 })
 
+router.delete('/articles/:id/:rev', function(req, res) {
+  console.log('/articles DELETE', req.params.id, req.params.rev);
+  
+  // Delete on CouchDB
+  database.remove(req.params.id, req.params.rev, function(err, result) {
+    if (err) {
+      res.status(404)
+        .end('CouchDB error while trying to remove document: ' + err.toString()); // TODO: map error codes
+      return;
+    }
+    res.json(result);
+  })
+})
+
 module.exports = router;
