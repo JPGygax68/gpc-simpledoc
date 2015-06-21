@@ -95,8 +95,7 @@ SimpleDocEditor.prototype.createNew = function()
     child_nodes: [ { content: '' } ]
   };
   
-  this.container.innerHTML = '';
-  this.container.appendChild( document_toDOM(this.doc) );
+  this._initForDocument();
 }
 
 /* "Load" the specified SimpleDoc document into this editor.
@@ -111,8 +110,7 @@ SimpleDocEditor.prototype.load = function(doc)
 
   this.doc = doc;
   
-  this.container.innerHTML = '';
-  this.container.appendChild( document_toDOM(this.doc) );
+  this._initForDocument();
 }
 
 SimpleDocEditor.prototype.document = function() { return this.doc; }
@@ -125,6 +123,20 @@ SimpleDocEditor.prototype.commitChanges = function()
   console.log('SimpleDocEditor::commitChanges()');
 
   this.doc = document_fromDOM(this.container); // Converter.domToData(this.container);
+}
+
+SimpleDocEditor.prototype._initForDocument = function()
+{  
+  this.container.innerHTML = '';
+  this.container.appendChild( document_toDOM(this.doc) );
+  this._attachHighlighter();
+}
+
+SimpleDocEditor.prototype._attachHighlighter = function()
+{
+  this.block_highlight = $('<div class="block-highlight">')
+    .offset( { top: 0, left: 0 } )
+    .appendTo(this.container);  
 }
 
 module.exports = SimpleDocEditor;
