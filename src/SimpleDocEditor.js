@@ -30,6 +30,7 @@ class SimpleDocEditor {
       .addClass('gpc-simpledoc-editor')
       .attr('contenteditable', true)
       .on('keydown', function(e) {
+        self._queueUpdateFromBrowserState();
         return self.onKeyDown(e);
       })
       .on('blur', function(e) {
@@ -38,6 +39,7 @@ class SimpleDocEditor {
       })
       .on('input', function(e) {
         console.log('input event:', e);
+        // TODO: set a dirty flag
       })      
       
     // Key sequences (using Mousetrap)
@@ -129,7 +131,33 @@ class SimpleDocEditor {
       .offset( { top: 0, left: 0 } )
       .appendTo(this.container);  
   }
+  
+  _afterPossibleSelectionChange()
+  {
+    // Highlight 
+    var sel = rangy.getSelection();
+    var node = sel.anchorNode;
+    while (node && !(node.nodeType == 1 && getDisplay(node) == 'block')) {
+      node = node.parentNode;
+    }
+    console.log('containing block element:', node);
+    var p = $(node).position();
+    var r = { left: p.left, top: p.top, width: $(node).innerWidth(), height: $(node).innerHeight() };
+    $(this.block_highlight).css(r);
+    
+    
+    function getDisplay(node) { return window.getComputedStyle(node).getPropertyValue('display'); }
+  }
 
+  _queueUpdateFromBrowserState()
+  {    
+    var self = this;
+   
+    // TODO: mechanism that avoids unnecessary repetitions
+    window.setTimeout( function() {
+      self._afterPossibleSelectionChange();
+    }, 100);
+  }
 }
 // Static members
 
