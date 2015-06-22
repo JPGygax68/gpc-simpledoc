@@ -26,7 +26,7 @@ Registry.registerPlugin('document', 'toDOM', function(data) {
       el.innerHTML = p.content;
       // Reference back to document element
       el._doc_elem = p;
-      el._docel_type = 'paragraph'; // necessary for event handling
+      el._docelt_type = 'paragraph'; // necessary for event handling
       return el;
     }
   
@@ -49,8 +49,13 @@ Registry.registerPlugin('document', 'fromDOM', function(container) {
       */
       for (var child = container.firstChild; !!child; child = child.nextSibling) 
       {
-        if (child.tagName === 'P') 
+        if (child._docelt_type === 'paragraph') {
           doc.child_nodes.push( paragraphFromElement(child) );
+        }
+        else if (child.tagName === 'P') {
+          doc.child_nodes.push( paragraphFromElement(child) );
+          console.warn('document fromDom(): compatibility conversion: P -> paragraph (without explicit doc element type)');
+        }
         else
           throw new Error('unexpected element:' + child);
       }

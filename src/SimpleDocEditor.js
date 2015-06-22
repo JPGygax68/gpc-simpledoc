@@ -194,7 +194,8 @@ class SimpleDocEditor {
       
       if (node.nodeType === 1) {
         var disp_type = getDisplayType(node);
-        if (disp_type === 'block') node._docelt_type = self.options.default_block_element_type; // TODO: TEMPORARY!
+        if (disp_type === 'block') node._docelt_type = self.options.default_block_element_type;
+        // TODO: inline, inline-block, others ?
       }
     }
     
