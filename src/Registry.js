@@ -28,7 +28,7 @@ class Registry {
   findPlugin(node_type, plugin_type)
   {
     var type_rec = this._getPerTypeRecord(node_type);
-    console.log('findPlugin:', node_type, plugin_type, '->', type_rec[plugin_type]);
+    console.log('findPlugin: node_type =', node_type, ', plugin_type =', plugin_type, '->', type_rec[plugin_type]);
     
     return type_rec[plugin_type];
   }

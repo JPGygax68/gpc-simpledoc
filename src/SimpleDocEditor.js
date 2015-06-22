@@ -18,20 +18,39 @@ var document_fromDOM = Registry.findPlugin('document', 'fromDOM');
 
 class SimpleDocEditor {
 
-  constructor()
+  constructor(options)
   {
     var self = this;
     
-    this.container = document.createElement('div');
-    this.container.className = 'gpc-simpledoc-editor';
-    this.container.contentEditable = true;
+    console.assert(options.default_block_element_type, "option \"default_block_element_type\" is mandatory!");
+    
+    this.options = options;
+    
+    // Root container
+    this.root_cont = document.createElement('div');
+    this.root_cont.className = 'gpc-simpledoc-editor';
+    
+    // Document container
+    this.doc_cont = document.createElement('div');
+    this.doc_cont.className = 'document-container';
+    this.root_cont.appendChild(this.doc_cont);
+    this.doc_cont.contentEditable = true;
 
-    $(this.container)
-      .addClass('gpc-simpledoc-editor')
+    // Block highlighting div
+    this.block_highlight = document.createElement('div');
+    this.block_highlight.className = 'block-highlight';
+    this.block_highlight.style.display = 'none';
+    this.root_cont.appendChild(this.block_highlight);
+      
+    // Hook up event handlers
+    $(this.doc_cont)
       .attr('contenteditable', true)
       .on('keydown', function(e) {
         self._queueUpdateFromBrowserState();
         return self.onKeyDown(e);
+      })
+      .on('mousedown', function(e) {
+        self._queueUpdateFromBrowserState();
       })
       .on('blur', function(e) {
         console.log('blur:', e);
@@ -43,10 +62,14 @@ class SimpleDocEditor {
       })      
       
     // Key sequences (using Mousetrap)
-    Mousetrap(this.container).bind('ctrl+ins t', function(e, keys) {
+    Mousetrap(this.doc_cont).bind('ctrl+ins t', function(e, keys) {
       console.log('not implemented yet: insert table', keys);
       e.preventDefault();
     }, 'keydown')
+    
+    this.handler_cache = {};
+    
+    this.curr_elem_proxy = null;
     
     console.log('SimpleDocEditor ctor:', this);
   }
@@ -58,7 +81,7 @@ class SimpleDocEditor {
   {
     this.element = element;
     element.innerHTML = '';
-    element.appendChild(this.container);
+    element.appendChild(this.root_cont);
   }
 
   onKeyDown(e)
@@ -92,7 +115,7 @@ class SimpleDocEditor {
   }
 
   /* "Load" the specified SimpleDoc document into this editor.
-    Mainly, this will create a DOM represention of the SimpleDoc document
+    Mainly, this will create a DOM representation of the SimpleDoc document
     that is made editable via the contentEditable attribute + some supporting
     JS code.
    */
@@ -111,54 +134,106 @@ class SimpleDocEditor {
   /* Commit changes made in the DOM to the SimpleDoc object assigned to this 
     editor instance.
    */
-  commitChanges()
-  {
+  commitChanges() {
+    
     console.log('SimpleDocEditor::commitChanges()');
 
-    this.doc = document_fromDOM(this.container); // Converter.domToData(this.container);
+    this.doc = document_fromDOM(this.doc_cont);
   }
 
-  _initForDocument()
-  {  
-    this.container.innerHTML = '';
-    this.container.appendChild( document_toDOM(this.doc) );
-    this._attachHighlighter();
-  }
-
-  _attachHighlighter()
-  {
-    this.block_highlight = $('<div class="block-highlight">')
-      .offset( { top: 0, left: 0 } )
-      .appendTo(this.container);  
-  }
+  _initForDocument() {  
   
-  _afterPossibleSelectionChange()
-  {
-    // Highlight 
-    var sel = rangy.getSelection();
+    rangy.getSelection().removeAllRanges(); // selection would otherwise stay inside removed DOM elements
+    this.doc_cont.innerHTML = '';
+    this.doc_cont.appendChild( document_toDOM(this.doc) );
+    //this._queueUpdateFromBrowserState();
+    this._synchronizeFromDOM();
+  }
+
+  _synchronizeFromDOM() {
+    
+    var self = this;
+    
+    // Find out where selection is by traversing upward
+    var sel = rangy.getSelection(); // window.getSelection();
     var node = sel.anchorNode;
-    while (node && !(node.nodeType == 1 && getDisplay(node) == 'block')) {
+    var block_highlight_done = false;
+    var elem_proxy = null;
+    while (node && node !== this.doc_cont && node !== document.body) {
+      if (!isDocElemProxy(node)) tryToMakeIntoDocElemProxy(node);
+      if (isDocElemProxy(node) && isBlockElement(node)) {
+        // TODO: support multiple levels of block elements ?
+        if (!block_highlight_done) { 
+          updateBlockHighlightPosition(node);
+          elem_proxy = node;
+          block_highlight_done = true; 
+        }
+      }
       node = node.parentNode;
     }
-    console.log('containing block element:', node);
-    var p = $(node).position();
-    var r = { left: p.left, top: p.top, width: $(node).innerWidth(), height: $(node).innerHeight() };
-    $(this.block_highlight).css(r);
     
+    // Did we end up at the doc_root node, or elsewhere ?
+    // TODO: block highlight veto-able by onEnteredProxy handler ?
+    if (node && node === this.doc_cont)
+      $(this.block_highlight).show();
+    else
+      $(this.block_highlight).hide();
     
-    function getDisplay(node) { return window.getComputedStyle(node).getPropertyValue('display'); }
+    // Did we move to a different document element ?
+    if (elem_proxy !== this.curr_elem_proxy) {
+      //console.log('new element proxy:', elem_proxy);
+      // TODO: the "left proxy" event must not be raised we moved into a child
+      if (!!this.curr_elem_proxy) this._callHandler(this.curr_elem_proxy, 'onLeftProxy'   );
+      if (!!elem_proxy          ) this._callHandler(elem_proxy          , 'onEnteredProxy');
+      this.curr_elem_proxy = elem_proxy;
+    }
+    
+    //-------------
+    
+    function tryToMakeIntoDocElemProxy(node) {
+      
+      if (node.nodeType === 1) {
+        var disp_type = getDisplayType(node);
+        if (disp_type === 'block') node._docelt_type = self.options.default_block_element_type; // TODO: TEMPORARY!
+      }
+    }
+    
+    function updateBlockHighlightPosition(node) {
+      var p = $(node).position();
+      var r = { left: p.left, top: p.top, width: $(node).innerWidth(), height: $(node).innerHeight() };
+      $(self.block_highlight).css(r).show();
+    }
+    
+    function isDocElemProxy(node) { return typeof (node._docelt_type) !== 'undefined'; }
+    function isBlockElement(node) { return node.nodeType == 1 && getDisplayType(node) === 'block'; }
+    function getDisplayType(node) { return window.getComputedStyle(node).getPropertyValue('display'); }
   }
-
-  _queueUpdateFromBrowserState()
-  {    
+  
+  _queueUpdateFromBrowserState() {    
+  
     var self = this;
    
     // TODO: mechanism that avoids unnecessary repetitions
     window.setTimeout( function() {
-      self._afterPossibleSelectionChange();
-    }, 100);
+      self._synchronizeFromDOM();
+    }, 50);
+  }
+
+  _callHandler(proxy_elem, event_name) {
+    
+    console.log('_callHandler', proxy_elem, event_name);
+    
+    var events;
+    if (!(events = this.handler_cache[proxy_elem._docelt_type])) 
+      events = this.handler_cache[proxy_elem._docelt_type] = {};
+    
+    var handler = events[event_name];
+    if (!handler) handler = Registry.findPlugin(proxy_elem._docelt_type, event_name);
+    
+    if (!!handler) return handler.call(this, proxy_elem);
   }
 }
+
 // Static members
 
 SimpleDocEditor.Registry = require('./Registry');

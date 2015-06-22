@@ -1,3 +1,22 @@
+2015-06-22
+==========
+
+The editor needs to keep track of where the selection (the caret) is within the document structure. This is required for probably more than one thing; right now, directing commands to the right handler (plugin) is what's on my mind.
+
+-----------
+
+New term: "proxy". Means the DOM element representing a document element.
+
+Got an embryo for event handlers. Next task: detect and handle new paragraphs created by editing. (Right now, new paragraph proxies are being assigned neither a document element, nor a doc element type - the latter is needed however for the newly-introduced event handling).
+
+2015-06-21
+==========
+
+Got "artificial" highlighting working as an experimental feature.
+
+- Multiple block ? (highlighted in different colors ?)
+- What about multiple level (e.g. chapter - paragraph) ?
+
 2015-06-20
 ==========
 

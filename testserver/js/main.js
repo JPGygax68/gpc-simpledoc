@@ -13,7 +13,9 @@ var data = {
   
   index: new ko.observableArray([]),
   
-  docEditor: new SimpleDocEditor(),
+  docEditor: new SimpleDocEditor({
+    default_block_element_type: 'paragraph'
+  }),
   
   // null will not do, the variables really need to be undefined
   docId: undefined,

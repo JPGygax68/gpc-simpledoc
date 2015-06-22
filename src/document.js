@@ -18,12 +18,15 @@ Registry.registerPlugin('document', 'toDOM', function(data) {
 
     //-----------------------
     
-    function elementFromParagraph(p)
-    {
+    function elementFromParagraph(p) {
+      
       var el = document.createElement('p');
       // TODO: define and handle inline elements
       //console.log('p.content:', p.content);
       el.innerHTML = p.content;
+      // Reference back to document element
+      el._doc_elem = p;
+      el._docel_type = 'paragraph'; // necessary for event handling
       return el;
     }
   
@@ -57,16 +60,16 @@ Registry.registerPlugin('document', 'fromDOM', function(container) {
     
     //------------------
     
-    function paragraphFromElement(cont_elem)
-    {
+    function paragraphFromElement(cont_elem) {
+      
       return {
         content: nodeToText(cont_elem)
       };
 
       //------------
       
-      function nodeToText(cont_elem)
-      {
+      function nodeToText(cont_elem) {
+        
         var text = '';
         for (var node = cont_elem.firstChild; !!node; node = node.nextSibling) 
         {
@@ -83,4 +86,16 @@ Registry.registerPlugin('document', 'fromDOM', function(container) {
         return text;
       }
     }
+});
+
+Registry.registerPlugin('paragraph', 'onEnteredProxy', function(dom_elem) {
+  // dom_elem: DOM element representing the paragraph
+  
+  console.log('paragraph onEnteredBranch');
+});
+
+Registry.registerPlugin('paragraph', 'onLeftProxy', function(dom_elem) {
+  // dom_elem: DOM element representing the paragraph
+  
+  console.log('paragraph onLeftBranch');  
 });
