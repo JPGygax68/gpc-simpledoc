@@ -14,28 +14,28 @@ class Registry {
     console.log('Registry.constructor');
   }
 
-  registerPlugin(node_type, plugin_type, plugin)
+  registerEventHandler(node_type, event_type, plugin)
   {
     console.assert(typeof node_type === 'string', "node_type must be a string");
-    console.assert(typeof plugin_type === 'string', "plugin_type must be a string");
+    console.assert(typeof event_type === 'string', "event_type must be a string");
     
-    var type_rec = this._getPerTypeRecord(node_type);
+    var type_rec = this._getNodeTypeRecord(node_type);
     
     // TODO: checks ?
-    type_rec[plugin_type] = plugin;
+    type_rec[event_type] = plugin;
   }
 
-  findPlugin(node_type, plugin_type)
+  findEventHandler(node_type, event_type)
   {
-    var type_rec = this._getPerTypeRecord(node_type);
-    console.log('findPlugin: node_type =', node_type, ', plugin_type =', plugin_type, '->', type_rec[plugin_type]);
+    var type_rec = this._getNodeTypeRecord(node_type);
+    console.log('findEventHandler: node_type =', node_type, ', event_type =', event_type, '->', type_rec[event_type]);
     
-    return type_rec[plugin_type];
+    return type_rec[event_type];
   }
 
   // PRIVATE -------------
   
-  _getPerTypeRecord(node_type) 
+  _getNodeTypeRecord(node_type) 
   {
     var rec = this.node_types[node_type];
     if (typeof rec === 'undefined') rec = this.node_types[node_type] = {};

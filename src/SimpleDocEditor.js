@@ -13,8 +13,8 @@ require('./document');
 //var Converter = require('./Converter');
 
 var Registry = require('./Registry');
-var document_toDOM = Registry.findPlugin('document', 'toDOM');
-var document_fromDOM = Registry.findPlugin('document', 'fromDOM');
+var document_toDOM = Registry.findEventHandler('document', 'toDOM');
+var document_fromDOM = Registry.findEventHandler('document', 'fromDOM');
 
 class SimpleDocEditor {
 
@@ -161,13 +161,15 @@ class SimpleDocEditor {
     var elem_proxy = null;
     while (node && node !== this.doc_cont && node !== document.body) {
       if (!isDocElemProxy(node)) tryToMakeIntoDocElemProxy(node);
-      if (isDocElemProxy(node) && isBlockElement(node)) {
+      if (isBlockElement(node)) {
         // TODO: support multiple levels of block elements ?
         if (!block_highlight_done) { 
           updateBlockHighlightPosition(node);
-          elem_proxy = node;
           block_highlight_done = true; 
         }
+      }
+      if (isDocElemProxy(node)) {
+        elem_proxy = node;
       }
       node = node.parentNode;
     }
@@ -222,6 +224,8 @@ class SimpleDocEditor {
 
   _callHandler(proxy_elem, event_name) {
     
+    // TODO: implement element type inheritance ?
+    
     console.log('_callHandler', proxy_elem, event_name);
     
     var events;
@@ -229,7 +233,7 @@ class SimpleDocEditor {
       events = this.handler_cache[proxy_elem._docelt_type] = {};
     
     var handler = events[event_name];
-    if (!handler) handler = Registry.findPlugin(proxy_elem._docelt_type, event_name);
+    if (!handler) handler = Registry.findEventHandler(proxy_elem._docelt_type, event_name);
     
     if (!!handler) return handler.call(this, proxy_elem);
   }

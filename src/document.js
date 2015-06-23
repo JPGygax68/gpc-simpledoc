@@ -1,10 +1,11 @@
 "use strict";
 
 var Registry = require("./Registry");
+require('./paragraph');
 
 // TODO: simpler form where node type needs to be specified only once
 
-Registry.registerPlugin('document', 'toDOM', function(data) {
+Registry.registerEventHandler('document', 'toDOM', function(data) {
   
     var frag = document.createDocumentFragment();
     
@@ -32,7 +33,7 @@ Registry.registerPlugin('document', 'toDOM', function(data) {
   
 });
 
-Registry.registerPlugin('document', 'fromDOM', function(container) {
+Registry.registerEventHandler('document', 'fromDOM', function(container) {
 
     var doc = {
       child_nodes: []
@@ -49,6 +50,8 @@ Registry.registerPlugin('document', 'fromDOM', function(container) {
       */
       for (var child = container.firstChild; !!child; child = child.nextSibling) 
       {
+        // TODO: use existing document element in child._doc_elem when available ?
+        // ... unless they were changed!
         if (child._docelt_type === 'paragraph') {
           doc.child_nodes.push( paragraphFromElement(child) );
         }
@@ -91,16 +94,4 @@ Registry.registerPlugin('document', 'fromDOM', function(container) {
         return text;
       }
     }
-});
-
-Registry.registerPlugin('paragraph', 'onEnteredProxy', function(dom_elem) {
-  // dom_elem: DOM element representing the paragraph
-  
-  console.log('paragraph onEnteredBranch');
-});
-
-Registry.registerPlugin('paragraph', 'onLeftProxy', function(dom_elem) {
-  // dom_elem: DOM element representing the paragraph
-  
-  console.log('paragraph onLeftBranch');  
 });
