@@ -9,8 +9,7 @@ Registry.registerEventHandler('document', 'toDOM', function(data) {
   
     var frag = document.createDocumentFragment();
     
-    for (var i = 0; i < data.child_nodes.length; i ++) 
-    {
+    for (var i = 0; i < data.child_nodes.length; i ++) {
       var child = data.child_nodes[i];
       frag.appendChild( elementFromParagraph(child) );
     } 
