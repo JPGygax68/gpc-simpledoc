@@ -1,3 +1,9 @@
+2015-06-24
+==========
+
+Lesson learned: an element that is marked content-editable will *capture* all keyboard input of contained elements, even if they are content-editable themselves. (At least on Chrome.)
+
+
 2015-06-22
 ==========
 

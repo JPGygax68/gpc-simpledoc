@@ -1,5 +1,7 @@
 "use strict";
 
+var _ = require('underscore');
+
 //var Constructor = require("constructor"+"").Constructor;
 
 /* The "Registry" is the hub for the plug-ins by which the Editor gets most of
@@ -42,6 +44,16 @@ class Registry {
 
     console.assert(!type_rec.actions[action_name]);
     type_rec.actions[action_name] = action;
+  }
+  
+  forEachAction(node_type, callback) {
+
+    console.assert(typeof node_type === 'string', "node_type must be a string");
+    
+    var type_rec = this._getNodeTypeRecord(node_type);
+
+    // TODO: include "parent" node type actions too
+    _.each(type_rec.actions, callback);
   }
   
   // PRIVATE -------------

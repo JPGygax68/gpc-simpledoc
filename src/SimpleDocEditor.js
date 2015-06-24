@@ -13,13 +13,13 @@ require('./document');
 //var Converter = require('./Converter');
 
 var Registry = require('./Registry');
-var document_toDOM = Registry.findEventHandler('document', 'toDOM');
+var document_toDOM   = Registry.findEventHandler('document', 'toDOM'  );
 var document_fromDOM = Registry.findEventHandler('document', 'fromDOM');
 
 class SimpleDocEditor {
 
-  constructor(options)
-  {
+  constructor(options) {
+    
     var self = this;
     
     console.assert(options.default_block_element_type, "option \"default_block_element_type\" is mandatory!");
@@ -34,7 +34,7 @@ class SimpleDocEditor {
     this.doc_cont = document.createElement('div');
     this.doc_cont.className = 'document-container';
     this.root_cont.appendChild(this.doc_cont);
-    this.doc_cont.contentEditable = true;
+    this.doc_cont.setAttribute('contenteditable', true);
 
     // Block highlighting div
     this.block_highlight = document.createElement('div');
@@ -44,7 +44,6 @@ class SimpleDocEditor {
       
     // Hook up event handlers
     $(this.doc_cont)
-      .attr('contenteditable', true)
       .on('keydown', function(e) {
         self._queueUpdateFromBrowserState();
         return self.onKeyDown(e);
@@ -88,6 +87,8 @@ class SimpleDocEditor {
     // e:       jQuery-wrapped keydown event
     // returns: return false will stop default action AND propagation (see jQuery)
   {
+    console.log('SimpleDocEditor.onKeyDown');
+    
     if (e.keyCode === 13) {
       var sel = rangy.getSelection();
       if (sel.isCollapsed) {
@@ -185,12 +186,49 @@ class SimpleDocEditor {
     if (elem_proxy !== this.curr_elem_proxy) {
       //console.log('new element proxy:', elem_proxy);
       // TODO: the "left proxy" event must not be raised we moved into a child
-      if (!!this.curr_elem_proxy) this._callHandler(this.curr_elem_proxy, 'onLeftProxy'   );
-      if (!!elem_proxy          ) this._callHandler(elem_proxy          , 'onEnteredProxy');
+      if (!!this.curr_elem_proxy) leavingProxy(this.curr_elem_proxy);
+      if (!!elem_proxy          ) enteringProxy(elem_proxy);
       this.curr_elem_proxy = elem_proxy;
     }
     
     //-------------
+    
+    function leavingProxy(proxy) {
+      
+      self._callHandler(proxy, 'onLeftProxy');
+
+      if (proxy._keydown_handlers) {
+        /* _.each(proxy._keydown_handlers, function(handler) {
+          console.log('removing keydown handler:', handler);
+          proxy.removeEventListener('keydown', handler, false); // TODO: useCapture parameter
+        });
+        proxy._keydown_handlers = []; */
+        $(proxy).off('keydown');
+      }
+    }
+    
+    function enteringProxy(proxy) {
+      
+      self._callHandler('onEnteredProxy', proxy);
+      
+      Registry.forEachAction(proxy._docelt_type, bindAction);
+      
+      function bindAction(action, name) {
+        if (action.keyboardShortcut) {
+          console.log('Adding keydown handler for action \"'+name+'" to proxy:', proxy);
+          /* if (!proxy._keydown_handlers) proxy._keydown_handlers = [];
+          var handler = function(e) {
+            console.log('action keydown handler for action \"'+name+'"');
+          };
+          proxy.addEventListener('keydown', handler, false); // TODO: useCapture parameter
+          proxy._keydown_handlers.push(handler); */
+          $(proxy).on('keydown', function(e) {
+            console.log('action keydown handler for action \"'+name+'"');
+          });
+          //$(proxy).on('mousedown', function() { console.log('MOUSEDOWN'); return true; });
+        }
+      }
+    }
     
     function tryToMakeIntoDocElemProxy(node) {
       

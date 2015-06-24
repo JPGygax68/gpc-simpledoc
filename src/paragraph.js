@@ -14,4 +14,11 @@ Registry.registerEventHandler('paragraph', 'onLeftProxy', function(dom_elem) {
   console.log('paragraph onEnteredProxy');  
 });
 
-//Registry.registerEventHandler('paragraph', '
+Registry.registerAction('paragraph', 'convertToHeader', {
+  
+  keyboardShortcut: 'Ctrl+H',
+  
+  procedure: function(proxy_elem) {
+  }
+  
+});

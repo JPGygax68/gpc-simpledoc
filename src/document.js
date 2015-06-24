@@ -20,13 +20,16 @@ Registry.registerEventHandler('document', 'toDOM', function(data) {
     
     function elementFromParagraph(p) {
       
-      var el = document.createElement('p');
+      var el = document.createElement('div');
       // TODO: define and handle inline elements
       //console.log('p.content:', p.content);
       el.innerHTML = p.content;
       // Reference back to document element
       el._doc_elem = p;
       el._docelt_type = 'paragraph'; // necessary for event handling
+      //el.setAttribute('contenteditable', true);
+      el.contentEditable = true;
+      //el.setAttribute('tabindex', '1');
       return el;
     }
   
@@ -57,6 +60,10 @@ Registry.registerEventHandler('document', 'fromDOM', function(container) {
         else if (child.tagName === 'P') {
           doc.child_nodes.push( paragraphFromElement(child) );
           console.warn('document fromDom(): compatibility conversion: P -> paragraph (without explicit doc element type)');
+        }
+        else if (child.tagName === 'DIV') {
+          // TODO: other element types, discriminate by looking at class tags
+          doc.child_nodes.push( paragraphFromElement(child) );
         }
         else
           throw new Error('unexpected element:' + child);
