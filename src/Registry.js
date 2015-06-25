@@ -46,7 +46,7 @@ class Registry {
     type_rec.actions[action_name] = action;
   }
   
-  forEachAction(node_type, callback) {
+  /* forEachAction(node_type, callback) {
 
     console.assert(typeof node_type === 'string', "node_type must be a string");
     
@@ -54,6 +54,12 @@ class Registry {
 
     // TODO: include "parent" node type actions too
     _.each(type_rec.actions, callback);
+  } */
+  
+  getActions(node_type) {
+    console.assert(typeof node_type === 'string', "node_type must be a string");    
+    var type_rec = this._getNodeTypeRecord(node_type);
+    return _.toArray(type_rec.actions);
   }
   
   // PRIVATE -------------

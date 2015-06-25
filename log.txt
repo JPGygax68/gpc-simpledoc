@@ -1,3 +1,17 @@
+2015-06-25
+==========
+
+(Note: the keyboard polyfill didn't work out. Apparently, it doesn't play well with the latest versions of Chrome, where some constants that it tries to define already exist, read-only.)
+
+Things are getting a bit more complex now with the implementation of the first special, element type specific "action" (Ctrl-H = convert paragraph to header).
+
+The questions this raises touch upon how to keep editor state sane when interacting with plugged in functionality.
+
+The ultimate in KISS, I suppose, would be not to give plugins any access to the DOM at all and force them to operate on the document only. This idea has appeal, but it would force the editor to keep a "shadow copy" of the document up-to-date for the plugins to work on (though that may be a good idea anyway). It might also seriously limit the things that plugins can do. In the end, I think it makes a lot more sense for plugins to get access to both document elements and element proxies.
+
+The trick will be to establish workable rules for the interaction between core and plugins. One of the bigger questions might be how to handle selection.
+
+
 2015-06-24
 ==========
 

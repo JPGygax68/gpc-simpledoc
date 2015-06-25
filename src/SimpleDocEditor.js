@@ -89,19 +89,37 @@ class SimpleDocEditor {
     // returns: return false will stop default action AND propagation (see jQuery)
   {
     console.log('SimpleDocEditor.onKeyDown:');
+    var self = this;
     
     // Traverse DOM branch up, starting from current element proxy, looking for keyboard shortcuts
     for (var elem = this.curr_elem_proxy; elem != this.doc_cont; elem = elem.parentNode) {
       
+      // Is element a proxy ? (i.e. does it have a document element type ?)
       if (elem._docelt_type) {
-        Registry.forEachAction(elem._docelt_type, function(action, name) {
-          if (shortcutMatchesKeydownEvent(action.keyboardShortcut, e)) { //.originalEvent)) {
-            console.log('About to execute action:', name);
+        var actions = Registry.getActions(elem._docelt_type);
+        for (var i = 0; i < actions.length; i++) {
+          var action = actions[i];
+          if (shortcutMatchesKeydownEvent(action.keyboardShortcut, e)) {
+            var report = action.procedure(elem);
+            console.log('action report:', report);
+            if (report) {
+              if (report.replacement_proxy) {
+                if (elem === this.curr_elem_proxy) {
+                  console.log('replaced the current element proxy');
+                  this.curr_elem_proxy = null;
+                  var range = rangy.createRange();
+                  range.selectNodeContents(report.replacement_proxy);
+                  rangy.getSelection().setSingleRange(range);
+                }
+                elem = report.replacement_proxy;
+              }
+              self._queueUpdateFromBrowserState();
+            }
             e.preventDefault();
             e.stopPropagation();
             return false;
           }
-        });
+        }
       }
     }
     
@@ -133,8 +151,8 @@ class SimpleDocEditor {
     }
   }
 
-  createNew()
-  {
+  createNew() {
+    
     console.log('SimpleDocEditor::createNew()');
     
     // TODO: protect against discarding current document
@@ -246,7 +264,7 @@ class SimpleDocEditor {
     
     function updateBlockHighlightPosition(node) {
       var p = $(node).position();
-      var r = { left: p.left, top: p.top, width: $(node).innerWidth(), height: $(node).innerHeight() };
+      var r = { left: p.left, top: p.top, width: $(node).outerWidth(true), height: $(node).outerHeight(true) };
       $(self.block_highlight).css(r).show();
     }
     

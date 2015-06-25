@@ -19,6 +19,22 @@ Registry.registerAction('paragraph', 'convertToHeader', {
   keyboardShortcut: 'Control+H',
   
   procedure: function(proxy_elem) {
+    console.log('convertToHeader:', proxy_elem);
+    
+    // TODO: define and use service method to create proxy element
+    var header_elem = document.createElement('h1');
+    header_elem._docelt_type = 'header';
+    header_elem.innerHTML = proxy_elem.innerHTML;
+    
+    // TODO: define and use service method to manipulate proxy tree
+    var parent = proxy_elem.parentNode;
+    parent.replaceChild(header_elem, proxy_elem);
+    
+    // Indicate that the editor needs to update itself
+    // TODO: define and use service method ?
+    return {
+      replacement_proxy: header_elem
+    };
   }
   
 });
