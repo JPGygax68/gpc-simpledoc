@@ -16,7 +16,7 @@ Registry.registerEventHandler('paragraph', 'onLeftProxy', function(dom_elem) {
 
 Registry.registerAction('paragraph', 'convertToHeader', {
   
-  keyboardShortcut: 'Ctrl+H',
+  keyboardShortcut: 'Control+H',
   
   procedure: function(proxy_elem) {
   }

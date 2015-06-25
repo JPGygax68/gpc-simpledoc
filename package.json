@@ -16,6 +16,7 @@
   "devDependencies": {
     "babelify": "^6.1.2",
     "browserify": "^10",
+    "browserify-shim": "^3.8.9",
     "gulp": "^3.8.11",
     "gulp-babel": "^5.1.0",
     "gulp-jade": "^1.0.0",
@@ -43,7 +44,10 @@
   "browserify": {
     "transform": [
       "stylify",
-      "babelify"
+      "babelify",
+      "browserify-shim"
     ]
+  },
+  "browserify-shim": {
   }
 }

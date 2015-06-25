@@ -6,6 +6,7 @@ var _ = require('underscore');
 var $ = require('jquery');
 var rangy = require('rangy');
 var Mousetrap = require('mousetrap');
+//require('../vendors/inexorabletash/keyboard');
 
 // TODO: the plugins should live in their own packages
 require('./document');
@@ -87,17 +88,48 @@ class SimpleDocEditor {
     // e:       jQuery-wrapped keydown event
     // returns: return false will stop default action AND propagation (see jQuery)
   {
-    console.log('SimpleDocEditor.onKeyDown');
+    console.log('SimpleDocEditor.onKeyDown:');
     
-    if (e.keyCode === 13) {
-      var sel = rangy.getSelection();
-      if (sel.isCollapsed) {
-        //this.queueCommit();
+    // Traverse DOM branch up, starting from current element proxy, looking for keyboard shortcuts
+    for (var elem = this.curr_elem_proxy; elem != this.doc_cont; elem = elem.parentNode) {
+      
+      if (elem._docelt_type) {
+        Registry.forEachAction(elem._docelt_type, function(action, name) {
+          if (shortcutMatchesKeydownEvent(action.keyboardShortcut, e)) { //.originalEvent)) {
+            console.log('About to execute action:', name);
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          }
+        });
       }
-      return true;
     }
-    else if (e.ctrlKey && !e.shiftKey && !e.metaKey && !e.altKey && e.keyCode === 45) {
-      this.key_combination = ['^Ins']
+    
+    //----------------------
+    
+    function shortcutMatchesKeydownEvent(shortcut, e) {
+      
+      console.log('shortcutMatchesKeydownEvent', shortcut, e);
+      var parts = shortcut.split('+');
+      // Check modifiers
+      for (var i = 0; i < (parts.length - 1); i++) {
+        var mod = parts[i].toLowerCase();
+        if (mod === 'Control'  && !e.ctrlKey ) return false;
+        if (mod === 'Shift'    && !e.shiftKey) return false;
+        if (mod === 'Alt'      && !e.altKey  ) return false;
+        if (mod === 'Meta'     && !e.metaKey ) return false;
+        /* var mod = parts[i];
+        if (!e.getModifierState(mod)) return false; */
+      }
+      // Check main key
+      var key = parts[parts.length-1];
+      if (key.length === 1) {
+        if (String.fromCharCode(e.which).toLowerCase() === key.toLowerCase()) return true;
+      }
+      else {
+        console.assert(false, 'shortcutMatchesKeydownEvent(): named keys not supported yet: "' + key + '"');
+      }
+      return false;
     }
   }
 
@@ -196,38 +228,11 @@ class SimpleDocEditor {
     function leavingProxy(proxy) {
       
       self._callHandler(proxy, 'onLeftProxy');
-
-      if (proxy._keydown_handlers) {
-        /* _.each(proxy._keydown_handlers, function(handler) {
-          console.log('removing keydown handler:', handler);
-          proxy.removeEventListener('keydown', handler, false); // TODO: useCapture parameter
-        });
-        proxy._keydown_handlers = []; */
-        $(proxy).off('keydown');
-      }
     }
     
     function enteringProxy(proxy) {
       
       self._callHandler('onEnteredProxy', proxy);
-      
-      Registry.forEachAction(proxy._docelt_type, bindAction);
-      
-      function bindAction(action, name) {
-        if (action.keyboardShortcut) {
-          console.log('Adding keydown handler for action \"'+name+'" to proxy:', proxy);
-          /* if (!proxy._keydown_handlers) proxy._keydown_handlers = [];
-          var handler = function(e) {
-            console.log('action keydown handler for action \"'+name+'"');
-          };
-          proxy.addEventListener('keydown', handler, false); // TODO: useCapture parameter
-          proxy._keydown_handlers.push(handler); */
-          $(proxy).on('keydown', function(e) {
-            console.log('action keydown handler for action \"'+name+'"');
-          });
-          //$(proxy).on('mousedown', function() { console.log('MOUSEDOWN'); return true; });
-        }
-      }
     }
     
     function tryToMakeIntoDocElemProxy(node) {

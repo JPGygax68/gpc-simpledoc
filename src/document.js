@@ -28,8 +28,7 @@ Registry.registerEventHandler('document', 'toDOM', function(data) {
       el._doc_elem = p;
       el._docelt_type = 'paragraph'; // necessary for event handling
       //el.setAttribute('contenteditable', true);
-      el.contentEditable = true;
-      //el.setAttribute('tabindex', '1');
+      el.setAttribute('tabindex', 0);
       return el;
     }
   

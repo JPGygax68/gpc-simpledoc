@@ -3,6 +3,19 @@
 
 Lesson learned: an element that is marked content-editable will *capture* all keyboard input of contained elements, even if they are content-editable themselves. (At least on Chrome.)
 
+------
+
+Another lesson: the W3C (or Mozilla?) is working on cool keyboard-related functionality, but it's not here yet. jQuery only normalizes the "which" property, which is already marked as deprecated in the MDN (although there is no clear alternative to it on some current browsers). 
+In particular, the "key" property, which gives a spelled-out name to every key, is only implemented in the current Firefox. Unfortunately, jQuery does not attempt to provide that functionality.
+
+A polyfill exists: 
+  https://github.com/inexorabletash/polyfill/blob/master/keyboard.md 
+  
+I think this represents the best way to go forward at this time. Here's hoping jQuery won't mess it up.
+What's a bit sad is that this polyfill probably wouldn't play too well with CommonJS.
+
+Or maybe it would be saner to just use the "which" property, which after all is normalized by jQuery and broadly available even without jQuery (though it *is* marked as deprecated in the MDN). Creating a map from "which" to key names could be done piece-meal.
+
 
 2015-06-22
 ==========
