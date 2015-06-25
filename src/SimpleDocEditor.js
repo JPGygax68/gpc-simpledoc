@@ -96,30 +96,13 @@ class SimpleDocEditor {
       
       // Is element a proxy ? (i.e. does it have a document element type ?)
       if (elem._docelt_type) {
-        var actions = Registry.getActions(elem._docelt_type);
-        for (var i = 0; i < actions.length; i++) {
-          var action = actions[i];
+        var consumed = Registry.forEachAction( function(action, name) {
+          //console.log('action \"'+name+'":', action);
           if (shortcutMatchesKeydownEvent(action.keyboardShortcut, e)) {
-            var report = action.procedure(elem);
-            console.log('action report:', report);
-            if (report) {
-              if (report.replacement_proxy) {
-                if (elem === this.curr_elem_proxy) {
-                  console.log('replaced the current element proxy');
-                  this.curr_elem_proxy = null;
-                  var range = rangy.createRange();
-                  range.selectNodeContents(report.replacement_proxy);
-                  rangy.getSelection().setSingleRange(range);
-                }
-                elem = report.replacement_proxy;
-              }
-              self._queueUpdateFromBrowserState();
-            }
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
+            if (executeAction(action, elem)) return true; // -> exit forEachAction()
           }
-        }
+        });
+        if (consumed) return false; // stop event propagation and default action
       }
     }
     
@@ -149,7 +132,28 @@ class SimpleDocEditor {
       }
       return false;
     }
-  }
+    
+    function executeAction(action, proxy_elem) {
+      
+      var report = action.procedure(proxy_elem);
+      //console.log('action report:', report);
+      if (report) {
+        if (report.replacement_proxy) {
+          if (elem === self.curr_elem_proxy) {
+            console.log('replaced the current element proxy');
+            self.curr_elem_proxy = null;
+            var range = rangy.createRange();
+            range.selectNodeContents(report.replacement_proxy);
+            rangy.getSelection().setSingleRange(range);
+          }
+          elem = report.replacement_proxy;
+        }
+        self._queueUpdateFromBrowserState();
+        return true;
+      }
+    }
+    
+  } // onKeyDown
 
   createNew() {
     

@@ -13,6 +13,8 @@ class Registry {
   constructor() {
     
     this.node_types = {};
+    this.actions = {};
+    
     console.log('Registry.constructor');
   }
 
@@ -35,32 +37,25 @@ class Registry {
     return type_rec.event_handlers[event_type];
   }
 
-  registerAction(node_type, action_name, action) {
+  registerAction(action_name, action) {
 
-    console.assert(typeof node_type === 'string', "node_type must be a string");
     console.assert(typeof action_name === 'string', "action_name must be a string");
     
-    var type_rec = this._getNodeTypeRecord(node_type);
-
-    console.assert(!type_rec.actions[action_name]);
-    type_rec.actions[action_name] = action;
+    console.assert(!this.actions[action_name]);
+    this.actions[action_name] = action;
   }
   
-  /* forEachAction(node_type, callback) {
-
-    console.assert(typeof node_type === 'string', "node_type must be a string");
-    
-    var type_rec = this._getNodeTypeRecord(node_type);
+  forEachAction(callback) {
 
     // TODO: include "parent" node type actions too
-    _.each(type_rec.actions, callback);
-  } */
+    return _.some(this.actions, callback);
+  }
   
-  getActions(node_type) {
+  /* getActions(node_type) {
     console.assert(typeof node_type === 'string', "node_type must be a string");    
     var type_rec = this._getNodeTypeRecord(node_type);
     return _.toArray(type_rec.actions);
-  }
+  } */
   
   // PRIVATE -------------
   
