@@ -11,25 +11,35 @@ Registry.registerEventHandler('document', 'toDOM', function(data) {
     
     for (var i = 0; i < data.child_nodes.length; i ++) {
       var child = data.child_nodes[i];
-      frag.appendChild( elementFromParagraph(child) );
+      frag.appendChild( createProxy(child) );
     } 
 
     return frag;
 
     //-----------------------
     
-    function elementFromParagraph(p) {
+    function createProxy(elem) {
+
+      var proxy;
       
-      var el = document.createElement('div');
-      // TODO: define and handle inline elements
-      //console.log('p.content:', p.content);
-      el.innerHTML = p.content;
+      if (elem.type === 'paragraph' || !elem.type) {
+        proxy = document.createElement('p');
+        // TODO: define and handle inline elements
+        //console.log('p.content:', p.content);
+      }
+      else if (elem.type === 'header') {
+        proxy = document.createElement('h1');
+      }
+      else
+        throw new Error('unknown/unsupported document element type "'+elem.type+'"');
+
+      proxy.innerHTML = elem.content;
+      
       // Reference back to document element
-      el._doc_elem = p;
-      el._docelt_type = 'paragraph'; // necessary for event handling
-      //el.setAttribute('contenteditable', true);
-      el.setAttribute('tabindex', 0);
-      return el;
+      proxy._doc_elem = elem;
+      proxy._docelt_type = elem.type; // necessary for event handling
+      
+      return proxy;
     }
   
 });
@@ -53,19 +63,7 @@ Registry.registerEventHandler('document', 'fromDOM', function(container) {
       {
         // TODO: use existing document element in child._doc_elem when available ?
         // ... unless they were changed!
-        if (child._docelt_type === 'paragraph') {
-          doc.child_nodes.push( paragraphFromElement(child) );
-        }
-        else if (child.tagName === 'P') {
-          doc.child_nodes.push( paragraphFromElement(child) );
-          console.warn('document fromDom(): compatibility conversion: P -> paragraph (without explicit doc element type)');
-        }
-        else if (child.tagName === 'DIV') {
-          // TODO: other element types, discriminate by looking at class tags
-          doc.child_nodes.push( paragraphFromElement(child) );
-        }
-        else
-          throw new Error('unexpected element:' + child);
+        doc.child_nodes.push( elementFromProxy(child) );
       }
     //}
     
@@ -73,10 +71,11 @@ Registry.registerEventHandler('document', 'fromDOM', function(container) {
     
     //------------------
     
-    function paragraphFromElement(cont_elem) {
+    function elementFromProxy(proxy) {
       
       return {
-        content: nodeToText(cont_elem)
+        type: proxy._docelt_type,
+        content: nodeToText(proxy)
       };
 
       //------------
@@ -91,8 +90,9 @@ Registry.registerEventHandler('document', 'fromDOM', function(container) {
             // TODO: callbacks for special handling
             text += nodeToText(node) // recurse
           }
-          else if (node.nodeType == 3) 
+          else if (node.nodeType == 3) {
             text += node.nodeValue;
+          }
           else
             throw new Error("nodeToText(): unsupported node type");
         }

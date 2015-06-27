@@ -115,10 +115,10 @@ class SimpleDocEditor {
       // Check modifiers
       for (var i = 0; i < (parts.length - 1); i++) {
         var mod = parts[i].toLowerCase();
-        if (mod === 'Control'  && !e.ctrlKey ) return false;
-        if (mod === 'Shift'    && !e.shiftKey) return false;
-        if (mod === 'Alt'      && !e.altKey  ) return false;
-        if (mod === 'Meta'     && !e.metaKey ) return false;
+        if (mod === 'control'  && !e.ctrlKey ) return false;
+        if (mod === 'shift'    && !e.shiftKey) return false;
+        if (mod === 'alt'      && !e.altKey  ) return false;
+        if (mod === 'meta'     && !e.metaKey ) return false;
         /* var mod = parts[i];
         if (!e.getModifierState(mod)) return false; */
       }
