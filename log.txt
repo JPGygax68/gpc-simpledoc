@@ -1,3 +1,11 @@
+2015-06-27
+==========
+
+The following article is a total must-read:
+
+http://addyosmani.com/blog/mutation-observers/
+
+
 2015-06-25
 ==========
 

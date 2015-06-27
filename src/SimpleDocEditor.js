@@ -46,11 +46,22 @@ class SimpleDocEditor {
     // Hook up event handlers
     $(this.doc_cont)
       .on('keydown', function(e) {
-        self._queueUpdateFromBrowserState();
+        // Block undo and redo, replace with our own implementations
+        if (shortcutMatchesKeydownEvent('Control+Z', e)) {
+          self.undo();
+          return false;
+        }
+        else if (shortcutMatchesKeydownEvent('Control+Y', e)) {
+          self.redo();
+          return false;
+        }
         return self.onKeyDown(e);
       })
+      .on('keyup', function(e) {
+        self._queueUpdateFromSelection();
+      })
       .on('mousedown', function(e) {
-        self._queueUpdateFromBrowserState();
+        self._queueUpdateFromSelection();
       })
       .on('blur', function(e) {
         console.log('blur:', e);
@@ -70,6 +81,38 @@ class SimpleDocEditor {
     this.handler_cache = {};
     
     this.curr_elem_proxy = null;
+    
+    this.undo_stack = [];
+    this.undostack_blocked = false;
+    
+    // Experimental: mutation observer
+    this.mutation_observer = new MutationObserver( function(all) {
+      if (self.undostack_blocked) {
+        console.log('undo stack was blocked, unblocking');
+        self.undostack_blocked = false;
+        return;
+      }
+      console.log('mutations:');
+      _.each(all, function(mutation, i) {
+        console.log(i + ':', mutation);
+        var entry = {
+          mutation: mutation,
+          el: mutation.target,
+          value: mutation.target.textContent,
+          oldValue: mutation.oldValue
+        };
+        self.undo_stack.push(entry);
+        console.log('undo stack has', self.undo_stack.length, 'elements');
+      });
+    });
+    this.mutation_observer.observe(this.doc_cont, {
+      childList: true, // if mutations to children are to be observed
+      attributes: true, // if mutations to attributes are to be observed
+      characterData: true, // if data is to be observed
+      subtree: true, // if mutations to both the target and descendants are to be observed
+      attributeOldValue: true, // if attributes is true & attribute value prior to mutation needs recording
+      characterDataOldValue: true // if characterData is true & data before mutations needs recording
+    });
     
     console.log('SimpleDocEditor ctor:', this);
   }
@@ -106,33 +149,6 @@ class SimpleDocEditor {
       }
     }
     
-    //----------------------
-    
-    function shortcutMatchesKeydownEvent(shortcut, e) {
-      
-      console.log('shortcutMatchesKeydownEvent', shortcut, e);
-      var parts = shortcut.split('+');
-      // Check modifiers
-      for (var i = 0; i < (parts.length - 1); i++) {
-        var mod = parts[i].toLowerCase();
-        if (mod === 'control'  && !e.ctrlKey ) return false;
-        if (mod === 'shift'    && !e.shiftKey) return false;
-        if (mod === 'alt'      && !e.altKey  ) return false;
-        if (mod === 'meta'     && !e.metaKey ) return false;
-        /* var mod = parts[i];
-        if (!e.getModifierState(mod)) return false; */
-      }
-      // Check main key
-      var key = parts[parts.length-1];
-      if (key.length === 1) {
-        if (String.fromCharCode(e.which).toLowerCase() === key.toLowerCase()) return true;
-      }
-      else {
-        console.assert(false, 'shortcutMatchesKeydownEvent(): named keys not supported yet: "' + key + '"');
-      }
-      return false;
-    }
-    
     function executeAction(action, proxy_elem) {
       
       var report = action.procedure(proxy_elem);
@@ -148,7 +164,7 @@ class SimpleDocEditor {
           }
           elem = report.replacement_proxy;
         }
-        self._queueUpdateFromBrowserState();
+        self._queueUpdateFromSelection();
         return true;
       }
     }
@@ -196,16 +212,36 @@ class SimpleDocEditor {
     this.doc = document_fromDOM(this.doc_cont);
   }
 
+  undo() {
+    
+    if (this.undo_stack.length > 0) {
+      this.undostack_blocked = true;
+      
+      var entry = this.undo_stack.pop();
+      //this.redo_stack.push(entry);
+      
+      entry.mutation.target.textContent = entry.oldValue;
+      
+      console.log('remaining undo stack:', this.undo_stack);
+    }
+  }
+  
+  redo() {
+    throw new Error('not implemented yet');
+  }
+  
+  // Internal methods ---------------------------
+  
   _initForDocument() {  
   
     rangy.getSelection().removeAllRanges(); // selection would otherwise stay inside removed DOM elements
     this.doc_cont.innerHTML = '';
     this.doc_cont.appendChild( document_toDOM(this.doc) );
-    //this._queueUpdateFromBrowserState();
-    this._synchronizeFromDOM();
+    //this._queueUpdateFromSelection();
+    this._updateFromSelection();
   }
 
-  _synchronizeFromDOM() {
+  _updateFromSelection() {
     
     var self = this;
     
@@ -277,13 +313,13 @@ class SimpleDocEditor {
     function getDisplayType(node) { return window.getComputedStyle(node).getPropertyValue('display'); }
   }
   
-  _queueUpdateFromBrowserState() {    
+  _queueUpdateFromSelection() {    
   
     var self = this;
    
     // TODO: mechanism that avoids unnecessary repetitions
     window.setTimeout( function() {
-      self._synchronizeFromDOM();
+      self._updateFromSelection();
     }, 50);
   }
 
@@ -307,6 +343,34 @@ class SimpleDocEditor {
 // Static members
 
 SimpleDocEditor.Registry = require('./Registry');
+
+// INTERNAL UTILITY FUNCTIONS -------------------
+
+function shortcutMatchesKeydownEvent(shortcut, e) {
+  
+  console.log('shortcutMatchesKeydownEvent', shortcut, e);
+  var parts = shortcut.split('+');
+  // Check modifiers
+  for (var i = 0; i < (parts.length - 1); i++) {
+    var mod = parts[i].toLowerCase();
+    if (mod === 'control'  && !e.ctrlKey ) return false;
+    if (mod === 'shift'    && !e.shiftKey) return false;
+    if (mod === 'alt'      && !e.altKey  ) return false;
+    if (mod === 'meta'     && !e.metaKey ) return false;
+    /* var mod = parts[i];
+    if (!e.getModifierState(mod)) return false; */
+  }
+  // Check main key
+  var key = parts[parts.length-1];
+  if (key.length === 1) {
+    if (String.fromCharCode(e.which).toLowerCase() === key.toLowerCase()) return true;
+  }
+  else {
+    console.assert(false, 'shortcutMatchesKeydownEvent(): named keys not supported yet: "' + key + '"');
+  }
+  
+  return false;
+}
 
 
 module.exports = SimpleDocEditor;
