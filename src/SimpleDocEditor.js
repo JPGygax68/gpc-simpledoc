@@ -31,11 +31,27 @@ class CharacterAction extends Action {
     this.el = mutation.target;
     this.value = mutation.target.textContent;
     this.oldValue = mutation.oldValue;
+    // Find index of last character that differs from previous
+    if (this.value.length > this.oldValue.length) {
+      // One or more characters were inserted
+      for (var i = this.value.length, j = this.oldValue.length; i-- > 0 && j-- > 0 && this.value[i] === this.oldValue[j]; );
+      this.position = j + 1;
+    }
+    else if (this.value.length < this.oldValue.length) {
+      // One or more characters were removed
+      for (var i = 0, j = 0; i < this.value.length && j < this.oldValue.length && this.value[i] === this.oldValue[j]; i ++, j ++ );
+      this.position = j + 1;
+    }
+    else
+      throw new Error('CharacterAction ctor: new and old value have same length!?');
   }
   
   undo() {
     console.log('CharacterAction.undo()', this);
     this.el.textContent = this.oldValue;
+    var range = rangy.createRange();
+    range.setStartAndEnd(this.el, this.position); //selectNodeContents(el);
+    rangy.getSelection().setSingleRange(range);
   }
   
   redo() {
@@ -72,19 +88,6 @@ class SimpleDocEditor {
     // Hook up event handlers
     $(this.doc_cont)
       .on('keydown', function(e) {
-        // Block undo and redo, replace with our own implementations
-        if (shortcutMatchesKeydownEvent('Control+Z', e)) {
-          if (self.undo_stack.canUndo()) {
-            self.undo_stack.undo();
-          }
-          return false; // musn't mix built-in and our own undo
-        }
-        else if (shortcutMatchesKeydownEvent('Control+Y', e)) {
-          if (self.undo_stack.canRedo()) {
-            self.undo_stack.redo();
-          }
-          return false; // musn't mix built-in and our own undo
-        }
         return self.onKeyDown(e);
       })
       .on('keyup', function(e) {
@@ -92,6 +95,15 @@ class SimpleDocEditor {
       })
       .on('mousedown', function(e) {
         self._queueUpdateFromSelection();
+      })
+      .on('mouseup', function(e) {
+        // Experimental: selection bookmarks
+        window.setTimeout( () => {
+          var range = rangy.getSelection().getRangeAt(0);
+          console.log('Mouse Up selected range node:', range.commonAncestorContainer);
+          var bookmark = range.getBookmark();
+          console.log('Mouse Up bookmark:', bookmark);
+        }, 100);
       })
       .on('blur', function(e) {
         console.log('blur:', e);
@@ -158,6 +170,24 @@ class SimpleDocEditor {
   {
     console.log('SimpleDocEditor.onKeyDown:');
     var self = this;
+    
+    // Experimental: selection bookmarks
+    var bookmark = rangy.getSelection().getBookmark();
+    console.log('bookmark node:', bookmark.rangeBookmarks[0].containerNode);
+    
+    // Block undo and redo, replace with our own implementations
+    if (shortcutMatchesKeydownEvent('Control+Z', e)) {
+      if (self.undo_stack.canUndo()) {
+        self.undo_stack.undo();
+      }
+      return false; // musn't mix built-in and our own undo
+    }
+    else if (shortcutMatchesKeydownEvent('Control+Y', e)) {
+      if (self.undo_stack.canRedo()) {
+        self.undo_stack.redo();
+      }
+      return false; // musn't mix built-in and our own undo
+    }
     
     // Traverse DOM branch up, starting from current element proxy, looking for keyboard shortcuts
     for (var elem = this.curr_elem_proxy; elem != this.doc_cont; elem = elem.parentNode) {
