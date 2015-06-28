@@ -1,3 +1,14 @@
+2015-06-28
+==========
+
+I implemented an undo stack that so far works for character insertions and deletions. But it does not yet handle selection / caret. I tried a shortcut implementation based on comparing the old and new strings, but realized that cannot work in cases where characters are repeated.
+
+I will need to take a more serious approach that utilizes actual selection information. I'm thinking about tacking selection information onto the current element of the undo stack. The input event might be worth a try as the trigger for this operation, as it apparently is fired only after user input that actually changes the data - which in this case is exactly what is needed.
+
+I had a look at the bookmarking feature of rangy, however that doesn't seem to fit the bill, as positions appear to be character counts relative to the body tag. To obtain offsets relative to the containing node/element, one needs to examine the startNode/startOffset and endNode/endOffset properties of the Range objects.
+
+More thought will be needed to make this work in complex cases (multiple selections, selections spanning more than one node/element), but it should serve as a start.
+
 2015-06-27
 ==========
 

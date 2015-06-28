@@ -32,17 +32,25 @@ class CharacterAction extends Action {
     this.el = mutation.target;
     this.value = mutation.target.textContent;
     this.oldValue = mutation.oldValue;
-    // Count characters matching at the beginning
-    for (var i1 = 0, j1 = 0; i1 < this.value.length && j1 < this.oldValue.length && this.value[i1] === this.oldValue[j1]; i1 ++, j1 ++ );
-    // ... and at end
-    for (var i2 = this.value.length, j2 = this.oldValue.length; i2 > 0 && j2 > 0 && this.value[i2-1] === this.oldValue[j2-1]; i2 --, j2 --);
+    // Find out where change occurred
+    var i, j;
+    // Characters were added ?
+    if (this.value.length > this.oldValue.length) {
+      // Count characters matching at the beginning
+      for (i = 0, j = 0; i < this.value.length && j < this.oldValue.length && this.value[i] === this.oldValue[j]; i ++, j ++ );
+    }
+    // Characters were removed ?
+    else if (this.value.length < this.oldValue.length) {
+      // Count characters matching at end
+      for (i = this.value.length, j = this.oldValue.length; i > 0 && j > 0 && this.value[i-1] === this.oldValue[j-1]; i --, j --);
+    }
+    this.position = i;
+    this.oldPosition = j;
     /* // Count characters matching at the end
     for (var i = this.value.length, j = this.oldValue.length; i > 0 && j > 0 && this.value[i-1] === this.oldValue[j-1]; i--, j--);
     // Count characters matching at the beginning
-    for (var i = 0, j = 0; i < this.value.length && j < this.oldValue.length && this.value[i] === this.oldValue[j]; i ++, j ++); */
-    var i = i1 > i2 ? i1 : i2, j = j1 > j2 ? j1 : j2;
-    this.position = i;
-    this.oldPosition = j;
+    for (var i = 0, j = 0; i < this.value.length && j < this.oldValue.length && this.value[i] === this.oldValue[j]; i ++, j ++);
+    var i = i1 > i2 ? i1 : i2, j = j1 > j2 ? j1 : j2; */
   }
   
   undo() {
