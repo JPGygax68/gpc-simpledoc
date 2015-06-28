@@ -12,10 +12,36 @@ var Mousetrap = require('mousetrap');
 require('./document');
 
 //var Converter = require('./Converter');
+var undo = require('./undo');
+var UndoStack = undo.UndoStack; 
+var Action = undo.Action;
 
 var Registry = require('./Registry');
 var document_toDOM   = Registry.findEventHandler('document', 'toDOM'  );
 var document_fromDOM = Registry.findEventHandler('document', 'fromDOM');
+
+class CharacterAction extends Action {
+  
+  constructor(mutation) 
+    // TODO: may need to pass editor instance as well  
+  {
+    super();
+    //this.editor = editor;
+    this.mutation = mutation;
+    this.el = mutation.target;
+    this.value = mutation.target.textContent;
+    this.oldValue = mutation.oldValue;
+  }
+  
+  undo() {
+    console.log('CharacterAction.undo()', this);
+    this.el.textContent = this.oldValue;
+  }
+  
+  redo() {
+    this.el.textContent = this.value;
+  }
+};
 
 class SimpleDocEditor {
 
@@ -48,12 +74,16 @@ class SimpleDocEditor {
       .on('keydown', function(e) {
         // Block undo and redo, replace with our own implementations
         if (shortcutMatchesKeydownEvent('Control+Z', e)) {
-          self.undo();
-          return false;
+          if (self.undo_stack.canUndo()) {
+            self.undo_stack.undo();
+          }
+          return false; // musn't mix built-in and our own undo
         }
         else if (shortcutMatchesKeydownEvent('Control+Y', e)) {
-          self.redo();
-          return false;
+          if (self.undo_stack.canRedo()) {
+            self.undo_stack.redo();
+          }
+          return false; // musn't mix built-in and our own undo
         }
         return self.onKeyDown(e);
       })
@@ -82,27 +112,22 @@ class SimpleDocEditor {
     
     this.curr_elem_proxy = null;
     
-    this.undo_stack = [];
-    this.undostack_blocked = false;
+    this.undo_stack = new UndoStack();
     
     // Experimental: mutation observer
     this.mutation_observer = new MutationObserver( function(all) {
-      if (self.undostack_blocked) {
-        console.log('undo stack was blocked, unblocking');
-        self.undostack_blocked = false;
+      if (self.undo_stack.isBlocked()) {
+        self.undo_stack.release();
         return;
       }
-      console.log('mutations:');
+      //console.log('mutations:');
       _.each(all, function(mutation, i) {
-        console.log(i + ':', mutation);
-        var entry = {
-          mutation: mutation,
-          el: mutation.target,
-          value: mutation.target.textContent,
-          oldValue: mutation.oldValue
-        };
-        self.undo_stack.push(entry);
-        console.log('undo stack has', self.undo_stack.length, 'elements');
+        //console.log(i + ':', mutation);
+        if (mutation.type === 'characterData') {
+          self.undo_stack.recordAction( new CharacterAction(mutation) );
+        }
+        else
+          console.warn('unsupported mutation type "' + mutation.type + '"');
       });
     });
     this.mutation_observer.observe(this.doc_cont, {
@@ -214,16 +239,22 @@ class SimpleDocEditor {
 
   undo() {
     
-    if (this.undo_stack.length > 0) {
-      this.undostack_blocked = true;
+    if (document.queryCommandEnabled('undo')) {
+      
+      document.execCommand('undo');
+
+
+      /* this.undostack_blocked = true;
       
       var entry = this.undo_stack.pop();
       //this.redo_stack.push(entry);
       
       entry.mutation.target.textContent = entry.oldValue;
       
-      console.log('remaining undo stack:', this.undo_stack);
+      console.log('remaining undo stack:', this.undo_stack); */
     }
+    else
+      console.log('No undo possible!');
   }
   
   redo() {
@@ -348,7 +379,6 @@ SimpleDocEditor.Registry = require('./Registry');
 
 function shortcutMatchesKeydownEvent(shortcut, e) {
   
-  console.log('shortcutMatchesKeydownEvent', shortcut, e);
   var parts = shortcut.split('+');
   // Check modifiers
   for (var i = 0; i < (parts.length - 1); i++) {
@@ -363,7 +393,10 @@ function shortcutMatchesKeydownEvent(shortcut, e) {
   // Check main key
   var key = parts[parts.length-1];
   if (key.length === 1) {
-    if (String.fromCharCode(e.which).toLowerCase() === key.toLowerCase()) return true;
+    if (String.fromCharCode(e.which).toLowerCase() === key.toLowerCase()) {
+      console.log('shortcutMatchesKeydownEvent', shortcut, e);
+      return true;
+    }
   }
   else {
     console.assert(false, 'shortcutMatchesKeydownEvent(): named keys not supported yet: "' + key + '"');

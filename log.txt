@@ -1,6 +1,23 @@
 2015-06-27
 ==========
 
+I learned more about undo/redo today; I also had a quick look at scribe, a wysiwyg component developed at (?) and used by the newspaper The Guardian.
+
+scribe uses interesting and advanced Javascript techniques and libraries; most importantly though, it incorporates quite a bit of specialized know-how about handling browser quirks. It makes me wonder whether it really is a good idea to try and lift this thing by myself. On the other hand, I remain unconvinced that scribe would be a good foundation for my own work, mainly because it's documentation is rather lacking, but also because my own goal is somewhat different from that of scribe's authors, which was to make an editor that creates semantic HTML.
+
+About undo and redo, here's what I have learned:
+- built-in undo/redo works reasonably well, but the chain breaks when the DOM is manipulated by code (except via Document.execCommand)
+- the MutationObserver object makes it possible to manually record and undo/redo manipulations
+
+So, one possible way to go forward would be to simply use execCommand(), which however would not cover things like assigning classes or special attributes.
+
+The polar opposite approach would be to use a MutationObserver to record and undo/redo changes entirely by code. That approach should afford virtually unlimited possibilities [note: such as "adorning" recorded changes with extra information, in addition to having any number of specialized undo/redo record], but would involve quite a bit of added complexity. One problem is that selection character-level changes must be done at the string level, meaning that the caret position / selection range gets lost when that kind of undo is done manually, so that selection must be saved and restored manually as well.
+
+Nevertheless, I feel that the latter way is the more promising one for the intended goal, which is to create a customizable "semantic" document editor. Also, a code-controlled undo stack has a better chance of being integrated with revision control mechanisms later on.
+
+2015-06-27
+==========
+
 The following article is a total must-read:
 
 http://addyosmani.com/blog/mutation-observers/
