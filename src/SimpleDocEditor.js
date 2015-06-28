@@ -25,37 +25,39 @@ class CharacterAction extends Action {
   constructor(mutation) 
     // TODO: may need to pass editor instance as well  
   {
+    console.log('CharacterAction ctor');
     super();
     //this.editor = editor;
     this.mutation = mutation;
     this.el = mutation.target;
     this.value = mutation.target.textContent;
     this.oldValue = mutation.oldValue;
-    // Find index of last character that differs from previous
-    if (this.value.length > this.oldValue.length) {
-      // One or more characters were inserted
-      for (var i = this.value.length, j = this.oldValue.length; i-- > 0 && j-- > 0 && this.value[i] === this.oldValue[j]; );
-      this.position = j + 1;
-    }
-    else if (this.value.length < this.oldValue.length) {
-      // One or more characters were removed
-      for (var i = 0, j = 0; i < this.value.length && j < this.oldValue.length && this.value[i] === this.oldValue[j]; i ++, j ++ );
-      this.position = j + 1;
-    }
-    else
-      throw new Error('CharacterAction ctor: new and old value have same length!?');
+    // Count characters matching at the beginning
+    for (var i1 = 0, j1 = 0; i1 < this.value.length && j1 < this.oldValue.length && this.value[i1] === this.oldValue[j1]; i1 ++, j1 ++ );
+    // ... and at end
+    for (var i2 = this.value.length, j2 = this.oldValue.length; i2 > 0 && j2 > 0 && this.value[i2-1] === this.oldValue[j2-1]; i2 --, j2 --);
+    /* // Count characters matching at the end
+    for (var i = this.value.length, j = this.oldValue.length; i > 0 && j > 0 && this.value[i-1] === this.oldValue[j-1]; i--, j--);
+    // Count characters matching at the beginning
+    for (var i = 0, j = 0; i < this.value.length && j < this.oldValue.length && this.value[i] === this.oldValue[j]; i ++, j ++); */
+    var i = i1 > i2 ? i1 : i2, j = j1 > j2 ? j1 : j2;
+    this.position = i;
+    this.oldPosition = j;
   }
   
   undo() {
     console.log('CharacterAction.undo()', this);
     this.el.textContent = this.oldValue;
     var range = rangy.createRange();
-    range.setStartAndEnd(this.el, this.position); //selectNodeContents(el);
+    range.setStartAndEnd(this.el, this.oldPosition); //selectNodeContents(el);
     rangy.getSelection().setSingleRange(range);
   }
   
   redo() {
     this.el.textContent = this.value;
+    var range = rangy.createRange();
+    range.setStartAndEnd(this.el, this.position);
+    rangy.getSelection().setSingleRange(range);
   }
 };
 
