@@ -5,6 +5,7 @@
 var _ = require('underscore');
 var $ = require('jquery');
 var rangy = require('rangy');
+var textRange = require('rangy/lib/rangy-textrange');
 var Mousetrap = require('mousetrap');
 //require('../vendors/inexorabletash/keyboard');
 
@@ -32,40 +33,15 @@ class CharacterAction extends Action {
     this.el = mutation.target;
     this.value = mutation.target.textContent;
     this.oldValue = mutation.oldValue;
-    // Find out where change occurred
-    var i, j;
-    // Characters were added ?
-    if (this.value.length > this.oldValue.length) {
-      // Count characters matching at the beginning
-      for (i = 0, j = 0; i < this.value.length && j < this.oldValue.length && this.value[i] === this.oldValue[j]; i ++, j ++ );
-    }
-    // Characters were removed ?
-    else if (this.value.length < this.oldValue.length) {
-      // Count characters matching at end
-      for (i = this.value.length, j = this.oldValue.length; i > 0 && j > 0 && this.value[i-1] === this.oldValue[j-1]; i --, j --);
-    }
-    this.position = i;
-    this.oldPosition = j;
-    /* // Count characters matching at the end
-    for (var i = this.value.length, j = this.oldValue.length; i > 0 && j > 0 && this.value[i-1] === this.oldValue[j-1]; i--, j--);
-    // Count characters matching at the beginning
-    for (var i = 0, j = 0; i < this.value.length && j < this.oldValue.length && this.value[i] === this.oldValue[j]; i ++, j ++);
-    var i = i1 > i2 ? i1 : i2, j = j1 > j2 ? j1 : j2; */
   }
   
   undo() {
     console.log('CharacterAction.undo()', this);
     this.el.textContent = this.oldValue;
-    var range = rangy.createRange();
-    range.setStartAndEnd(this.el, this.oldPosition); //selectNodeContents(el);
-    rangy.getSelection().setSingleRange(range);
   }
   
   redo() {
     this.el.textContent = this.value;
-    var range = rangy.createRange();
-    range.setStartAndEnd(this.el, this.position);
-    rangy.getSelection().setSingleRange(range);
   }
 };
 
@@ -104,16 +80,9 @@ class SimpleDocEditor {
         self._queueUpdateFromSelection();
       })
       .on('mousedown', function(e) {
-        self._queueUpdateFromSelection();
       })
       .on('mouseup', function(e) {
-        // Experimental: selection bookmarks
-        window.setTimeout( () => {
-          var range = rangy.getSelection().getRangeAt(0);
-          console.log('Mouse Up selected range node:', range.commonAncestorContainer);
-          var bookmark = range.getBookmark();
-          console.log('Mouse Up bookmark:', bookmark);
-        }, 100);
+        self._queueUpdateFromSelection();
       })
       .on('blur', function(e) {
         console.log('blur:', e);
@@ -122,6 +91,7 @@ class SimpleDocEditor {
       .on('input', function(e) {
         console.log('input event:', e);
         // TODO: set a dirty flag
+        self._queueUpdateFromSelection();
       })      
       
     // Key sequences (using Mousetrap)
@@ -315,9 +285,11 @@ class SimpleDocEditor {
   _updateFromSelection() {
     
     var self = this;
-    
-    // Find out where selection is by traversing upward
+
+    // Preps
     var sel = rangy.getSelection(); // window.getSelection();
+    
+    // Find out where selection is in document tree by traversing upward
     var node = sel.anchorNode;
     var block_highlight_done = false;
     var elem_proxy = null;
@@ -330,11 +302,16 @@ class SimpleDocEditor {
           block_highlight_done = true; 
         }
       }
-      if (isDocElemProxy(node)) {
+      if (!elem_proxy && isDocElemProxy(node)) {
         elem_proxy = node;
       }
       node = node.parentNode;
     }
+    
+    // Selection
+    this.undo_stack.recordSelection( function(data) {
+      rangy.getSelection().restoreCharacterRanges(self.doc_cont, data);
+    }, sel.saveCharacterRanges(this.doc_cont) );
     
     // Did we end up at the doc_root node, or elsewhere ?
     // TODO: block highlight veto-able by onEnteredProxy handler ?

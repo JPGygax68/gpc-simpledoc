@@ -1,3 +1,12 @@
+2015-06-29
+==========
+
+New approach for handling selection with the undo stack: an second stack that records selections, with each record tracing the index into the action stack that was current at that moment. This makes it easy, after an action undo, to find the selection state to restore.
+
+Redo is not implemented yet, but the real problem is that keyboard repetitions to not generate the "keyup" event upon which I was relying. I'll need to find another way.
+
+-> Hm. Hooking both keyup *and* input seems to do the trick. More testing will be required... tomorrow.
+
 2015-06-28
 ==========
 
