@@ -74,14 +74,17 @@ class SimpleDocEditor {
     // Hook up event handlers
     $(this.doc_cont)
       .on('keydown', function(e) {
+        console.log('keydown');
         return self.onKeyDown(e);
       })
       .on('keyup', function(e) {
+        console.log('keyup');
         self._queueUpdateFromSelection();
       })
       .on('mousedown', function(e) {
       })
       .on('mouseup', function(e) {
+        console.log('mouseup');
         self._queueUpdateFromSelection();
       })
       .on('blur', function(e) {
@@ -89,9 +92,9 @@ class SimpleDocEditor {
         //self.save(element); // TODO: save, but to temporary storage
       })
       .on('input', function(e) {
-        console.log('input event:', e);
+        //console.log('input event:', e);
         // TODO: set a dirty flag
-        self._queueUpdateFromSelection();
+        //self._queueUpdateFromSelection();
       })      
       
     // Key sequences (using Mousetrap)
@@ -151,15 +154,13 @@ class SimpleDocEditor {
     console.log('SimpleDocEditor.onKeyDown:');
     var self = this;
     
-    // Experimental: selection bookmarks
-    var bookmark = rangy.getSelection().getBookmark();
-    console.log('bookmark node:', bookmark.rangeBookmarks[0].containerNode);
-    
     // Block undo and redo, replace with our own implementations
     if (shortcutMatchesKeydownEvent('Control+Z', e)) {
       if (self.undo_stack.canUndo()) {
         self.undo_stack.undo();
       }
+      else
+        console.log('cannot undo!');
       return false; // musn't mix built-in and our own undo
     }
     else if (shortcutMatchesKeydownEvent('Control+Y', e)) {
@@ -309,9 +310,9 @@ class SimpleDocEditor {
     }
     
     // Selection
-    this.undo_stack.recordSelection( function(data) {
+    this.undo_stack.recordSelection(); /* function(data) {
       rangy.getSelection().restoreCharacterRanges(self.doc_cont, data);
-    }, sel.saveCharacterRanges(this.doc_cont) );
+    }, sel.saveCharacterRanges(this.doc_cont) ); */
     
     // Did we end up at the doc_root node, or elsewhere ?
     // TODO: block highlight veto-able by onEnteredProxy handler ?
@@ -421,6 +422,5 @@ function shortcutMatchesKeydownEvent(shortcut, e) {
   
   return false;
 }
-
 
 module.exports = SimpleDocEditor;

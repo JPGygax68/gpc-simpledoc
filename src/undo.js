@@ -30,22 +30,64 @@ class UndoStack {
     console.log('UndoStack.recordAction() done;', 'index:', this._act_index, 'stack size:', this._actions.length);    
   }
   
-  recordSelection(callback, data) {
+  recordSelection() {
+    console.log('recordSelection()', 'index:', this._sel_index);
     
+    // Truncate selection stack if one or more undo's have been executed previously
     if (this._sel_index < this._selections.length) {
       console.log('not at top of selection undo stack (index = ' + this._sel_index + ', length = ' + this._selections.length + '), truncating');
       this._selections.splice(this._sel_index);
       console.log('selection stack length after splicing:', this._selections.length);
     }
     
-    this._selections.push({
-      action_index: this._act_index,
-      callback: callback,
-      data: data
-    });
-    this._sel_index ++;
+    // Obtain the current selection
+    var sel = rangy.getSelection();
+    
+    // Check if the new selection is identical to the previous one
+    if (this._sel_index === 0 || !areSelectionsIdentical(this._selections[this._sel_index-1].selection, sel)) { 
+      
+      this._selections.push({
+        action_index: this._act_index,
+        selection: copySelection(sel)
+      });
+      this._sel_index ++;
 
-    console.log('UndoStack.recordSelection() done;', 'index:', this._sel_index, 'stack size:', this._selections.length);    
+      console.log('UndoStack.recordSelection(): new selection added:', 'index:', this._sel_index, 'stack size:', this._selections.length);
+    }
+    else
+      console.log('UndoStack.recordSelection(): selection was unchanged, not recorded');
+    
+    //-----------------
+    
+    function areSelectionsIdentical(sel1, sel2) {
+      console.log('areSelectionsIdentical()'); //, sel1, sel2);
+      if (sel1.rangeCount !== sel2.rangeCount) return false;
+      
+      for (var i = 0; i < sel1.rangeCount; i++) {
+        var range1 = sel1.getRangeAt(i), range2 = sel2.getRangeAt(i);
+        console.log(range1, range2);
+        if (range1.startContainer !== range2.startContainer) return false;
+        if (range1.startOffset    !== range2.startOffset   ) return false;
+        if (range1.endContainer   !== range2.endContainer  ) return false;
+        if (range1.endOffset      !== range2.endOffset     ) return false;
+      }
+      
+      return true;
+    }
+    
+    function copySelection(orig) {
+      
+      var copy = { rangeCount: orig.rangeCount, _ranges: [], getRangeAt: function(index) { return this._ranges[index]; } };
+      for (var i = 0; i < orig.rangeCount; i ++) {
+        var range = orig.getRangeAt(i);
+        copy._ranges.push({
+          startContainer: range.startContainer, startOffset: range.startOffset,
+          endContainer  : range.endContainer  , endOffset  : range.endOffset
+        });
+      }
+      
+      return copy;
+    }
   }
   
   canUndo() { return this._act_index > 0; } // TODO: make veto-able via event ?
