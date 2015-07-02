@@ -74,17 +74,19 @@ class SimpleDocEditor {
     // Hook up event handlers
     $(this.doc_cont)
       .on('keydown', function(e) {
-        console.log('keydown');
+        //console.log('keydown');
         return self.onKeyDown(e);
       })
       .on('keyup', function(e) {
-        console.log('keyup');
+        //console.log('keyup');
         self._queueUpdateFromSelection();
+        if (self.undo_stack.isBlocked()) self.undo_stack.release();
       })
       .on('mousedown', function(e) {
+        //console.log('mousedown');
       })
       .on('mouseup', function(e) {
-        console.log('mouseup');
+        //console.log('mouseup');
         self._queueUpdateFromSelection();
       })
       .on('blur', function(e) {
@@ -112,6 +114,7 @@ class SimpleDocEditor {
     // Experimental: mutation observer
     this.mutation_observer = new MutationObserver( function(all) {
       if (self.undo_stack.isBlocked()) {
+        console.log('releasing undo stack');
         self.undo_stack.release();
         return;
       }
@@ -151,7 +154,7 @@ class SimpleDocEditor {
     // e:       jQuery-wrapped keydown event
     // returns: return false will stop default action AND propagation (see jQuery)
   {
-    console.log('SimpleDocEditor.onKeyDown:');
+    //console.log('SimpleDocEditor.onKeyDown:');
     var self = this;
     
     // Block undo and redo, replace with our own implementations
