@@ -26,13 +26,13 @@ class CharacterAction extends Action {
   constructor(mutation) 
     // TODO: may need to pass editor instance as well  
   {
-    console.log('CharacterAction ctor');
+    console.log('CharacterAction ctor', mutation.oldValue, mutation.target.textContent);
     super();
     //this.editor = editor;
     this.mutation = mutation;
     this.el = mutation.target;
-    this.value = mutation.target.textContent;
-    this.oldValue = mutation.oldValue;
+    this.value = mutation.target.textContent.slice(0);
+    this.oldValue = mutation.oldValue.slice(0);
   }
   
   undo() {

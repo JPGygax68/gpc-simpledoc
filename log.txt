@@ -1,3 +1,12 @@
+2015-07-03 (2am)
+================
+
+- Have tried to implement undo() that handles both selections and "actions".
+
+- MutationObserver seems to have serious problems when user enters spaces. Not sure why this happens or how to counter it. Also, I should probably check if this would also happen with earlier versions.
+
+- There may be an alternative to implementing my own undo()/redo() stack: committing to executing all changes via the selection object. This could work because there is a method that can insert a node. Not sure however if that works for nodes that have children while maintaining undo capability.
+
 2015-06-29
 ==========
 

@@ -31,12 +31,15 @@ class UndoStack {
   }
   
   recordSelection() {
+    
+    if (this.isBlocked()) throw new Error('UndoStack.recordSelection() called while blocked!');
+    
     //if (this._selections.length >= 2) return;
-    console.log('recordSelection()', 'index:', this._sel_index);
+    //console.log('recordSelection()', 'index:', this._sel_index);
     
     
     // Obtain the current selection
-    var sel = window.getSelection(); //rangy.getSelection();
+    var sel = rangy.getSelection();
     
     // Check if the new selection is identical to the previous one
     if (this._sel_index === 0 || !areSelectionsIdentical(this._selections[this._sel_index-1].selection, sel)) { 
@@ -125,7 +128,7 @@ class UndoStack {
       // Find selection corresponding to current action
       if (this._act_index > 0) {
         for (var i = self._sel_index; i > 1 && self._selections[i-1].action_index > self._act_index; i--);
-        if (i > 0) undoSelection();
+        if (i > 1) undoSelection();
       }
     }
 
@@ -136,8 +139,8 @@ class UndoStack {
       
       var old_sel = self._selections[--self._sel_index - 1].selection;
       console.log('old_sel:', old_sel, '(Index:', self._sel_index, ')');
-      var curr_sel = window.getSelection();
-      self._blocked = true;
+      var curr_sel = rangy.getSelection();
+      //self._blocked = true;
       try {
         curr_sel.removeAllRanges();
         for (var orig of old_sel._ranges) {
@@ -149,7 +152,7 @@ class UndoStack {
         //rangy.getSelection().setSingleRange(old_sel._ranges[0]); //.setRanges(old_sel._ranges);
       }
       catch(e) {
-        self._blocked = false;
+        //self._blocked = false;
         throw e;
       }
       console.log('old selection applied');
